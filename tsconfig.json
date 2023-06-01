@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "module": "umd",
+    "target": "es5",
+    "sourceMap": false,
+    "experimentalDecorators": true,
+    "outDir": "./dst",
+    "baseUrl": "./",
+    "lib": [
+      "es5",
+      "es2015.proxy",
+      "es2015.collection"
+    ],
+    "esModuleInterop": true
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/dist",
+    "**/*.spec.ts",
+    "**/*.js"
+  ]
+}

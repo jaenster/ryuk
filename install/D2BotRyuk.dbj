@@ -1,0 +1,23 @@
+const StarterConfig = {
+
+    // All seconds
+    MinGameTime: 120,
+    ResetCount: 30,
+    SwitchKeyDelay: 5,
+    ConnectingTimeout: 20,
+    PleaseWaitTimeout: 10,
+    WaitInLineTimeout: 60,
+    GameDoesNotExistTimeout: 30,
+
+    // All Minutes
+    RealmDownDelay: 3,
+    UnableToConnectDelay: 5,
+    CDKeyInUseDelay: 5,
+};
+
+include('polyfill.js') && include("OOG.js") && include('common/Misc.js');
+require('libs/Ryuk/oog');
+
+function main() {
+    while (true) delay(10);
+}

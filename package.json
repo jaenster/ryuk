@@ -1,0 +1,12 @@
+{
+  "name": "ryuk",
+  "version": "0.0.1",
+  "description": "ryuk, a bot that eats apples",
+  "main": "index.js",
+  "scripts": {},
+  "author": "jaenster",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  }
+}

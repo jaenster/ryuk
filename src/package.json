@@ -1,0 +1,13 @@
+{
+  "name": "Ryuk",
+  "version": "0.9.0",
+  "description": "A bot that eats apples",
+  "main": "starter.ts",
+  "repository": "https://github.com/jaenster/Ryuk",
+  "author": "Jaenster",
+  "license": "MIT",
+  "scripts": {
+    "installTypescript": "npm install -g typescript",
+    "runWatcher": "%APPDATA%\\npm\\tsc --watch"
+  }
+}
