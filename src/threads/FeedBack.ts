@@ -113,9 +113,9 @@
     })());
 
 
-    while (true) {
-      delay(3);
-    }
+    let quiting = false;
+    addEventListener('scriptmsg', data => data === 'quit' && (quiting = true));
+    while (!quiting) delay(1000);
   } else {
     const Delta = (new require('../../modules/Deltas'))();
 

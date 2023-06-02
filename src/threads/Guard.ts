@@ -136,7 +136,7 @@
 
             let timer = getTickCount();
             Worker.runInBackground('heartbeatForGuard', function () {
-                if ((getTickCount() - timer) < 1000 || (timer = getTickCount()) && false) return true;
+                if ((getTickCount() - timer) < 10000 || (timer = getTickCount()) && false) return true;
 
 
                 // Drop broken eth items that arent a belt

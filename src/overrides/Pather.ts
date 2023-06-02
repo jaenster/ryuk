@@ -278,33 +278,11 @@ new Override(Pather, Pather.moveTo, function (original, x: number, y: number, re
         console.log('Failed to teleport long distance  -- Distance ' + ((dist + .5) | 0));
       }
     }
-    /*
-            if (path.length === 2) {
-                // for short distance teleportation, its better to rewrite if the first node is nearly next to us.
-                // as any dodge dies instantly if we teleport almost next to us, specially at low fcr
-                if (path.first()?.distance < 15) {
-                    let teleDistance = getDistance(path.last(), me) / 3 * 2;
-                    const tmpPath = getPath(me.area, me.x, me.y, x, y, 1, teleDistance);
-
-                    if (tmpPath) {
-                        //ToDo check if this is shorter/better
-                        console.log('better tele? before ', path.map(el => el.distance), 'after', tmpPath.map(el => el.distance))
-                        // console.log('rewritten teleport path for safety');
-                        // path = tmpPath;
-                    }
-                }
-            }*/
   }
 
   if (pop) {
     path.pop();
   }
-
-  // PathDebug.drawPath(path);
-
-  // if (useTeleport && Config.TeleSwitch && path.length > 5) {
-  //     Attack.weaponSwitch(Attack.getPrimarySlot() ^ 1);
-  // }
 
   while (path.length > 0) {
     if (me.dead) { // Abort if dead
