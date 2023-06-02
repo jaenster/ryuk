@@ -4,6 +4,17 @@ import moveTo from "../../lib/MoveTo";
 
 export = function () {
 
+  const staff = me.getItem(sdk.items.FinishedStaff);
+  // Fetch the staff if it isnt in inventory
+  if (staff && !staff.isInInventory) {
+    const inTown = me.inTown;
+    const area = me.area;
+    !inTown && Pather.makePortal(true);
+    Town.openStash();
+    Storage.Inventory.MoveTo(staff);
+    !inTown && Town.moveToSpot('portal');
+    !inTown &&Pather.usePortal(area, me.name);
+  }
 
   if (!getUnit(2, sdk.units.HoradricstaffHolder)) {
     if (me.area !== sdk.areas.CanyonOfMagi) {
@@ -35,13 +46,15 @@ export = function () {
   }
 
   Pather.moveToPreset(me.area, 2, sdk.units.HoradricstaffHolder);
-
-  if (me.getItem(sdk.items.FinishedStaff)) {
+  if (staff) {
     Pather.makePortal();
     const orifince = Misc.poll(() => getUnit(2, sdk.units.HoradricstaffHolder))
 
     // cast tk on orifince
-    Skill.cast(sdk.skills.Telekinesis, 0, orifince);
+    Misc.poll(() => {
+      Skill.cast(sdk.skills.Telekinesis, 0, orifince);
+      return orifince.mode;
+    },1000, 30);
 
     const fullStaff = me.getItem(sdk.items.FinishedStaff);
     if (!fullStaff) throw new Error('Couldnt find fullstaff wtf');

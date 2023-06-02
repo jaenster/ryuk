@@ -101,7 +101,6 @@ export const talkTo = function (npc: string, cancel: boolean = true) {
   }
 
   let target = getUnit(1, npc);
-
   if (target && target.openMenu()) {
     cancel && me.cancel();
     return true;

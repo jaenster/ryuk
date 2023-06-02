@@ -1279,7 +1279,7 @@ declare global {
 
     getState(index: number, subid?: number): number;
 
-    setSkill() ;
+    setSkill(skillId: number, hand: 0|1|number, item?: ItemUnit):boolean ;
 
     move(x: number, y: number) ;
 

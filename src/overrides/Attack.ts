@@ -214,7 +214,7 @@ new Override(Attack, Attack.kill, function (original, classId) {
 
   gid = target.gid;
 
-  while (attackCount < Config.MaxAttackCount && this.checkMonster(target) && this.skipCheck(target)) {
+  while (attackCount < Config.MaxAttackCount && this.checkMonster(target) && !this.skipCheck(target)) {
     Misc.townCheck();
 
     if (!target || !copyUnit(target).x) { // Check if unit got invalidated, happens if necro raises a skeleton from the boss's corpse.
@@ -244,6 +244,7 @@ new Override(Attack, Attack.kill, function (original, classId) {
 
     attackCount += 1;
   }
+  console.log('attack kill end loop');
 
   if (attackCount === Config.MaxAttackCount) {
     errorInfo = " (attackCount exceeded)";
@@ -260,6 +261,7 @@ new Override(Attack, Attack.kill, function (original, classId) {
   }
 
   if (target.hp > 0 && target.mode !== 0 && target.mode !== 12) {
+    console.log(target, target.name, errorInfo);
     throw new Error("Failed to kill " + target.name + errorInfo);
   }
 

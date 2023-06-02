@@ -324,27 +324,13 @@ Unit.prototype.equip = function (destLocation: number | number[] = undefined, it
     return true;
   }
 
-  const findspot = function (item) {
-      console.debug(item);
-      let tempspot = Storage.Inventory.FindSpot(item);
-      console.debug(tempspot);
-
-      if (!getUIFlag(0x19) && tempspot) return {location: Storage.Inventory.location, coord: tempspot};
-
-      tempspot = Storage.Stash.FindSpot(item);
-      if (tempspot) return {location: Storage.Stash.location, coord: tempspot};
-
-      return undefined; // no spot found
-    },
-    doubleHanded = [26, 27, 34, 35, 67, 85, 86];
-
   // Not an item, or unidentified, or not enough stats
   if (item.type !== sdk.unittype.Item
     || !item.identified
     || item.getStat(sdk.stats.Levelreq) > targetUnit.getStat(12)
     || item.dexreq > targetUnit.getStat(2)
     || item.strreq > targetUnit.getStat(0)) {
-    console.debug('Cannot wear item? ');
+    console.debug('Cannot wear item?');
     return false;
   }
 

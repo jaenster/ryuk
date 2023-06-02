@@ -430,6 +430,7 @@ new Override(Skill, Skill.cast, function (this: typeof Skill, original, skillId,
     case me.inTown && !this.townSkill(skillId):
     case !item && (this.getManaCost(skillId) > me.mp || !me.getSkill(skillId, 1)):
     case !this.wereFormCheck(skillId):
+      console.log('No cast no se');
       return false;
     case skillId === undefined:
       throw new Error("Unit.cast: Must supply a skill ID");
@@ -449,7 +450,7 @@ new Override(Skill, Skill.cast, function (this: typeof Skill, original, skillId,
     return false;
   }
 
-  if (!this.setSkill(skillId, hand, item)) return false;
+  if (!me.setSkill(skillId, hand, item)) return false;
 
   if (Config.PacketCasting > 1) {
     switch (typeof x) {

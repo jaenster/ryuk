@@ -70,6 +70,7 @@ export const findActiveBuild = () => {
 
     // rollback build specific overrides
     lastBuild?.overrides.forEach(override => override.rollback());
+
     // apply current build overrides
     (lastBuild = curBuild)?.overrides.forEach(override => override.apply());
   }
@@ -99,7 +100,6 @@ me.on('levelUp', level => {
 
   FileTools.appendText('data/RyukData.' + me.name + '.lvl.csv', `${me.area}\t${seconds}\t${me.charlvl}\t${splitSeconds}\n`);
 });
-
 
 me.on('canSkill', function () {
   const build = findActiveBuild();

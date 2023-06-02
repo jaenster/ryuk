@@ -212,9 +212,10 @@ new Override(Town, Town.clearScrolls, function () {
 new Override(Town, Town.doChores, function (original, repair?: boolean) {
     if (!me.inTown) this.goToTown();
     if (me.act === 2 && getDistance(5153, 5203, me.x, me.y) < 30) {
-        talkTo('warriv', false);
-        Misc.useMenu(sdk.menu.GoWest);
-        Misc.poll(() => me.area === 1);
+        if (talkTo(NPC.Warriv, false)) {
+            Misc.useMenu(sdk.menu.GoWest);
+            Misc.poll(() => me.area === 1);
+        }
     }
 
     let i, cancelFlags = [0x01, 0x02, 0x04, 0x08, 0x14, 0x16, 0x0c, 0x0f, 0x19, 0x1a];

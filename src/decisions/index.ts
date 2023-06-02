@@ -604,6 +604,9 @@ export default function (): Decision {
       description: 'Act 2',
       depend: sdk.quests.SistersToTheSlaughter,
       skipAfter: sdk.quests.AbleToGotoActIII,
+      level: {
+        min: 18, // Due to teleport
+      },
       children: [
         {
           description: 'normal only',
@@ -611,10 +614,8 @@ export default function (): Decision {
           children: [
             {
               name: 'Staff',
-              skipAfter: sdk.quests.TheHoradricStaff,
-              level: {
-                min: 18, // Due to teleport
-              },
+              skipAfter: sdk.quests.TheSevenTombs,
+
               gold: {
                 min: Config.LowGold,
               },
@@ -624,20 +625,14 @@ export default function (): Decision {
             },
             {
               name: "Amulet",
-              skipAfter: sdk.quests.TheHoradricStaff,
-              level: {
-                min: 18
-              },
+              skipAfter: sdk.quests.TheSevenTombs,
               do() {
                 return haveWp(sdk.areas.CanyonOfMagi) && !me.getItem(sdk.items.ViperAmulet) && !me.getItem(sdk.items.FinishedStaff)
               }
             },
             {
               name: 'Cube',
-              skipAfter: sdk.quests.TheHoradricStaff,
-              level: {
-                min: 18,
-              },
+              skipAfter: sdk.quests.TheSevenTombs,
               gold: {
                 min: Config.LowGold,
               },

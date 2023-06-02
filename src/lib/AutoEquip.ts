@@ -35,8 +35,8 @@ class AutoEquip {
   private readonly sortItems: (a, b) => number;
 
   private readonly forUnit: 'merc' | 'me';
-  private readonly cachedWanted: Map<ItemUnit, 'AEM' | 'AE' | 0 | -1> = new Map();
-  private readonly cacheCalced: Map<ItemUnit, number> = new Map();
+  private readonly cachedWanted: Map<number/*gid*/, 'AEM' | 'AE' | 0 | -1> = new Map();
+  private readonly cacheCalced: Map<number/*gid*/, number> = new Map();
 
   private get reference(): Monster | MeType {
     if (this.forUnit === 'me') return me;
@@ -154,8 +154,8 @@ class AutoEquip {
       return this.calcCheckItem(item);
     }
     let ret;
-    if (!this.cachedWanted.has(item)) this.cachedWanted.set(item, ret = this.calcCheckItem(item));
-    return typeof ret === 'undefined' ? this.cachedWanted.get(item) : ret;
+    if (!this.cachedWanted.has(item.gid)) this.cachedWanted.set(item.gid, ret = this.calcCheckItem(item));
+    return typeof ret === 'undefined' ? this.cachedWanted.get(item.gid) : ret;
   }
 
   private equip(item: ItemUnit) {
@@ -166,12 +166,13 @@ class AutoEquip {
 
     if (item.isInStash) {
       if (!Town.openStash()) {
+        console.log('here?');
         return false;
       }
     }
 
     const tier = this.formula(item);
-    // console.debug(`equiping ${this.forUnit === 'me' ? '' : 'merc '}item ${item.name}. Tier ${tier}`);
+    console.debug(`equiping ${this.forUnit === 'me' ? '' : 'merc '}item ${item.name}. Tier ${tier}`);
 
     let bodyLocs = item.getBodyLoc();
     let currentItems = this.reference?.getItems() || undefined;
@@ -215,8 +216,9 @@ class AutoEquip {
         }
       }
       if (!found) {
-        this.cachedWanted.set(item, 0);
-        this.cacheCalced.set(item, -1337);
+        this.cachedWanted.set(item.gid, 0);
+        this.cacheCalced.set(item.gid, -1337);
+        console.log('here1234?');
         return false;
       }
     }
@@ -226,10 +228,12 @@ class AutoEquip {
     if (old && old.unequiped && old.unequiped.length) {
       const newTier = this.formula(old.unequiped.first());
       if (newTier > tier) {
+        console.log('here? rollback')
         return !!old.rollback(); // Rollback and return
       }
     }
 
+    console.log('here? did?')
     return true;
   }
 
@@ -289,9 +293,10 @@ class AutoEquip {
 
       let failed;
       if (!item.identified) {
+        console.log('here?');
         failed = this.equip(item);
-        this.cachedWanted.set(item, 0);
-        this.cacheCalced.set(item, -Infinity);
+        this.cachedWanted.set(item.gid, 0);
+        this.cacheCalced.set(item.gid, -Infinity);
       }
 
       if (returnTo.area !== me.area) {
@@ -728,10 +733,16 @@ export const mercAutoEquip = me.gametype && new AutoEquip(function formula(item:
   }
   return -Infinity;
 }, function (bodyLoc, item) {
-  // console.log('Should equip merc item', bodyLoc, item);
-  // make sure we are not in shop or anything
-  me.cancel() && me.cancel() && me.cancel();
-  if (!me.getMerc() || me.getMerc().dead || item.isInStash) {
+  console.debug('Should equip merc item', bodyLoc, item);
+
+  // If item is in stash
+  if (getUIFlag(sdk.uiflags.Stash) && item.isInStash) {
+    // Nothing if item is in stash
+  } else {
+    me.cancel();
+  }
+
+  if (!me.getMerc() || me.getMerc().dead) {
     return false;
   }
   return me.getMerc().equip(bodyLoc, item);
