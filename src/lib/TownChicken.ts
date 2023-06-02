@@ -1,6 +1,5 @@
 import worker from "../lib/worker";
 import {SkipScript} from "../decisions/Throwables";
-import sdk from "../sdk";
 
 const lastChickens: [number, number, number, number][] = [];
 const Config = {
@@ -9,10 +8,13 @@ const Config = {
   disabled: false,
 }
 
+let recursion = true;
+
 // @ts-ignore // Only load this shit in global scope
 if (getScript(true).name.toLowerCase() === 'default.dbj') {
   worker.runInBackground('townChicken', function () {
     if (Config.disabled) return true;
+    if (recursion) return true;
 
     let potionsPrice = Town.buyPotionsPrice();
     // town chicken if you have enough gold to buy potions, this is the goal of town chickening
@@ -66,22 +68,27 @@ if (getScript(true).name.toLowerCase() === 'default.dbj') {
       lastChickens.push([getTickCount(), me.area, me.x, me.y]);
 
       try {
-        Pather.makePortal(true);
-      } catch (e) {
-        console.warn("Town chicken catch");
-        throw e;
+        recursion = true;
+        try {
+          Pather.makePortal(true);
+        } catch (e) {
+          console.warn("Town chicken catch");
+          throw e;
+        }
+        const [act, x, y] = [me.act, me.x, me.y];
+        const tick = getTickCount();
+
+        if (stopCurrentScript) throw new SkipScript("Too many town chickens on this script, next");
+
+        Town.doChores();
+        Town.goToTown(act);
+        Pather.moveTo(x, y)
+
+        while (getTickCount() - tick < 4500) delay(10);
+        Pather.usePortal(null, me.name);
+      } finally {
+        recursion = false;
       }
-      const [act, x, y] = [me.act, me.x, me.y];
-      const tick = getTickCount();
-
-      if (stopCurrentScript) throw new SkipScript("Too many town chickens on this script, next");
-
-      Town.doChores();
-      Town.goToTown(act);
-      Pather.moveTo(x, y)
-
-      while (getTickCount() - tick < 4500) delay(10);
-      Pather.usePortal(null, me.name);
     }
 
     return true;
