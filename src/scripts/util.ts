@@ -24,6 +24,10 @@ export const moveToExit = (to: number, from: number = me.area, settings?: object
 const wpIDs = [119, 145, 156, 157, 237, 238, 288, 323, 324, 398, 402, 429, 494, 496, 511, 539];
 export const getWpPreset = (area: number = me.area) => {
   for (let i = 0; i < wpIDs.length; i += 1) {
+    if (sdk.areas.townOf(area) !== me.act) {
+      console.log('To get preset we need to be in the correct act');
+      Town.goToTown(sdk.areas.townOf(area));
+    }
     let preset = getPresetUnit(area, 2, wpIDs[i]);
     if (preset) return preset;
   }

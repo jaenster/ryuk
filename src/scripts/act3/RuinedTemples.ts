@@ -8,7 +8,6 @@ export = function () {
 
   type AreaSetup = {
     area: number,
-    callback?: () => void,
   }
 
   const areas: { [key: string]: AreaSetup[] } = {
@@ -18,9 +17,6 @@ export = function () {
       },
       {
         area: sdk.areas.RuinedTemple,
-        callback() {
-          // Do quest / find the boss
-        }
       },
     ],
     UpperKurast: [
@@ -42,7 +38,7 @@ export = function () {
   }
 
 
-  Object.keys(areas).forEach(key => areas[key].forEach(({area, callback}) => {
+  Object.keys(areas).forEach(key => areas[key].forEach(({area}) => {
     // fetch the waypoint in case we dont have it yet
 
     if (me.area !== area) {
@@ -60,8 +56,13 @@ export = function () {
       }
     }
 
+    // Cast a frost nova on entry if monsters are near
+    if (getUnits(1).filter(el => el.distance < 7 && el.attackable).length) {
+      Skill.cast(sdk.skills.FrostNova);
+    }
+
     const filter = (monster: Monster, node: PathNode) => {
-      return monster.isSpecial || [94, 95].includes(monster.classid)
+      return monster.isSpecial || [94, 95].includes(monster.classid) || monster.distance < 5;
     }
 
     const packLocations = toPackOfMonsters(getUnits(1)
@@ -80,11 +81,12 @@ export = function () {
 
         // find the first node that is on a distance of 40 and proper check collision
         const node = path.find(node => {
+          const dist = getDistance(node.x, node.y, pack.x, pack.y);
           // if there isn't any nice collision path
-          if (node.distance < 15) return true;
+          if (dist < 30) return true;
 
           // If a spot if found where we are on a distance 40 and without collisions, stand here
-          return node.distance < 40 && !(getCollisionBetweenCoords(node, pack) & Collision.BLOCK_MISSILE);
+          return dist < 40 && !(getCollisionBetweenCoords(node, pack) & Collision.BLOCK_MISSILE);
         });
 
         if (!node) return;
