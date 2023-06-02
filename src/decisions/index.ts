@@ -614,8 +614,7 @@ export default function (): Decision {
           children: [
             {
               name: 'Staff',
-              skipAfter: sdk.quests.TheSevenTombs,
-
+              skipAfter: sdk.quests.TheHoradricStaff,
               gold: {
                 min: Config.LowGold,
               },
@@ -625,14 +624,14 @@ export default function (): Decision {
             },
             {
               name: "Amulet",
-              skipAfter: sdk.quests.TheSevenTombs,
+              skipAfter: sdk.quests.TheHoradricStaff,
               do() {
                 return haveWp(sdk.areas.CanyonOfMagi) && !me.getItem(sdk.items.ViperAmulet) && !me.getItem(sdk.items.FinishedStaff)
               }
             },
             {
               name: 'Cube',
-              skipAfter: sdk.quests.TheSevenTombs,
+              skipAfter: sdk.quests.TheHoradricStaff,
               gold: {
                 min: Config.LowGold,
               },

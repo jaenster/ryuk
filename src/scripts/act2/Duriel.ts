@@ -146,14 +146,20 @@ export = function () {
   Pather.moveTo(22576, 15591); // tyreal
 
   {
-    let unit = getUnit(1, "tyrael");
-    if (getDistance(me, unit) > 3) {
-      Pather.moveToUnit(unit);
+    let tyrael = getUnit(1, "tyrael");
+    if (getDistance(me, tyrael) > 3) {
+      Pather.moveToUnit(tyrael);
     }
 
-    unit.interact();
+    // Interact with tyreal
+    console.log('Get rid of tyreal dialog')
+    Misc.poll(() => {
+      Misc.click(0, 0, tyrael);
+      return getIsTalkingNPC() || getUIFlag(0x08);
+    })
     me.cancel();
     me.cancel();
+    console.log('refresh quest log (moves jerhyn if needed)')
     sendPacket(1, 0x40);
     delay((me.ping || 0) * 2 + 200);
 
