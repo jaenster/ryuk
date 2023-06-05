@@ -1523,6 +1523,7 @@ declare global {
   type eventName = 'gamepacket' | 'scriptmsg' | 'copydata' | 'keyup' | 'keydown'
 
   function addEventListener(eventType: 'gamepacket', callback: ((bytes: ArrayBufferLike) => boolean)): void
+  function addEventListener(eventType: 'gamepacketsent', callback: ((bytes: ArrayBufferLike) => boolean)): void
   function addEventListener(eventType: 'scriptmsg', callback: ((data: string | object | number) => void)): void
   function addEventListener(eventType: 'copydata', callback: ((mode: number, msg: string) => void)): void
   function addEventListener(eventType: 'itemaction', callback: ((gid: number, mode?: number, code?: string, global?: true) => void)): void
@@ -1531,6 +1532,7 @@ declare global {
   function addEventListener(eventType: eventName, callback: ((...args: any) => void)): void
 
   function removeEventListener(eventType: 'gamepacket', callback: ((bytes: ArrayBufferLike) => boolean)): void
+  function removeEventListener(eventType: 'gamepacketsent', callback: ((bytes: ArrayBufferLike) => boolean)): void
   function removeEventListener(eventType: 'scriptmsg', callback: ((data: string | object | number) => void)): void
   function removeEventListener(eventType: 'copydata', callback: ((mode: number, msg: string) => void)): void
   function removeEventListener(eventType: 'itemaction', callback: ((gid: number, mode?: number, code?: string, global?: true) => void)): void

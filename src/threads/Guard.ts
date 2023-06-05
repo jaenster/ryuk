@@ -1,5 +1,5 @@
 // @ts-ignore
-(function (module, require, thread) {
+(function (module, require, thread, globalThis) {
 
     const Messaging = require('../../modules/Messaging');
     const Worker = require('../lib/Worker').default;
@@ -123,7 +123,11 @@
             let quiting = false;
             addEventListener('scriptmsg', data => data === 'quit' && (quiting = true));
 
-            while (!quiting) delay(1000);
+            globalThis['main'] = function() {
+                while (!quiting) delay(3);
+                //@ts-ignore
+                getScript(true).stop();
+            }
             break;
         }
         case 'started': {
@@ -163,4 +167,4 @@
     }
 
     // @ts-ignore
-}).call(null, typeof module === 'object' && module || {}, typeof require === 'undefined' && (include('require.js') && require) || require, getScript.startAsThread());
+}).call(null, typeof module === 'object' && module || {}, typeof require === 'undefined' && (include('require.js') && require) || require, getScript.startAsThread(), [].filter.constructor("return this")());

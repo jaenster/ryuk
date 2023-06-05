@@ -1,4 +1,4 @@
-(function (module, require, thread) {
+(function (module, require, thread, globalThis) {
 
   const Messaging = require("../../modules/Messaging");
   const sdk = require('../sdk');
@@ -115,7 +115,21 @@
 
     let quiting = false;
     addEventListener('scriptmsg', data => data === 'quit' && (quiting = true));
-    while (!quiting) delay(1000);
+    addEventListener('gamepacketsent', byte => {
+      if (byte && byte[0] == 0x69) {
+        worker.push(() => {
+          quiting = true
+          scriptBroadcast('quit');
+        })
+      }
+      return false;
+    })
+
+    globalThis['main'] = function() {
+      while (!quiting) delay(3);
+      //@ts-ignore;
+      getScript(true).stop();
+    }
   } else {
     const Delta = (new require('../../modules/Deltas'))();
 
@@ -149,4 +163,4 @@
   module.exports = feedbackData;
 
   // @ts-ignore
-}).call(null, typeof module === 'object' && module || {}, typeof require === 'undefined' && (include('require.js') && require) || require, getScript.startAsThread());
+}).call(null, typeof module === 'object' && module || {}, typeof require === 'undefined' && (include('require.js') && require) || require, getScript.startAsThread(), [].filter.constructor("return this")());
