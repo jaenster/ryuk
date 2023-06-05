@@ -145,29 +145,7 @@ export default function moveTo(
         if (startIndex > -1) console.log('start idnex');
         let loops = 0, shrine;
         for (let i = startIndex > 1 ? startIndex : 0, node, l = path.length; i < l; loops++) {
-            /*
-                        // Check if any of the 10 previous or 10 next nodes are more nearby
-                        {
-                            let winner: PathNode & { index: number } = undefined;
-                            for (let j = i+1; j < Math.min(i+20, path.length); j++) {
-                                // Skip those nodes that dont exists
-                                let localNode = path[i - j];
-                                if (localNode && localNode.distance < path[i].distance) {
-                                    // localNode is nearest than node we want to go to
-                                    if (!winner || winner.distance > localNode.distance) {
-                                        // localNode is nearest than winner
-                                        winner = localNode;
-                                    }
-                                }
-                            }
-
-                            if (winner) {
-                                console.log('Jump to other node from ' + i + ' -> ' + winner.index);
-                                i = winner.index;
-                            }
-                        }
-            */
-            if (false && settings.allowClearing && settings.clearFilter && canTeleport) {
+            if (settings.allowClearing && settings.clearFilter && canTeleport) {
                 let oldI = i;
                 let j = i + 1;
                 let monsters = getUnits(sdk.unittype.Monsters)
@@ -265,10 +243,22 @@ export default function moveTo(
                     filter: settings.clearFilter
                 });
             }
-            // console.log('after clear');
-            // console.log('before pick');
-            Pickit.pickOnPath(path);
-            Misc.openChests(8);
+
+            // Do a dry run of clear, if no attack is wanted, do a pick
+            if (clear({
+                nodes: path,
+                range: settings.rangeOverride || Math.max(4, range),
+                callback: settings.callback,
+                filter: settings.clearFilter,
+                dryRun: true,
+            })) {
+                Pickit.pickOnPath(path);
+                Misc.openChests(8);
+            } else {
+                console.log('Skip pick due to monsters')
+                // Only very near items here
+                Pickit.pickItems(3, true);
+            }
             // console.log('after pick');
 
 

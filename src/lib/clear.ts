@@ -11,7 +11,8 @@ const defaults = {
   once: false,
   nodes: [] as { x, y }[] & { index: number },
   callback: undefined,
-  filter: undefined//(monster: Monster, node: {x, y}[]) => true
+  filter: undefined,
+  dryRun: false,
 };
 
 const shamans = [sdk.monsters.FallenShaman, sdk.monsters.CarverShaman2, sdk.monsters.DevilkinShaman2, sdk.monsters.DarkShaman1, sdk.monsters.WarpedShaman, sdk.monsters.CarverShaman, sdk.monsters.DevilkinShaman, sdk.monsters.DarkShaman2],
@@ -34,7 +35,7 @@ const clearDistance = function (x, y, xx, yy) {
 };
 
 const exporting: {
-  (_settings: Partial<typeof defaults>): void,
+  (_settings: Partial<typeof defaults>): boolean
 
 
   // Make exporting hookable
@@ -135,8 +136,8 @@ const exporting: {
       .filter(unit => ( // Shamaans have a higher range
             (range =>
                 start.length // If start has a length
-                  ? getDistance(start[0], start[1], unit) < range // If it has a range smaller as from the start point (when using me.clear)
-                  : getDistance(me, unit) < range // if "me" move, the object doesnt move. So, check distance of object
+                  ? getDistance(start[0], start[1], unit) < range // If it has a range smaller than from the start point (when using me.clear)
+                  : getDistance(me, unit) < range // if "me" move, the object doesn't move. So, check distance of object
             )(shamans.includes(unit.classid) ? settings.range * 1.6 : settings.range)
 
             // clear monsters on the path
@@ -159,7 +160,7 @@ const exporting: {
     if (settings.filter) {
       monsters = monsters.filter(settings.filter);
     } else {
-      // Fuck fallens on bigger range, they are totally pointless to pwn
+      // Fuck fallen's on bigger range, they are totally pointless to pwn
       monsters = monsters.filter((monster) => {
         let isFallenB = fallens.includes(monster.classid);
         return !isFallenB || monster.isSpecial || getDistance(me, monster) < 5
@@ -195,6 +196,7 @@ const exporting: {
     exporting.emit('sorting', units);
     // sorting algorithm can also take out monsters
     if (!units.length) break;
+    if (settings.dryRun) return false;
 
     // near monsters, we can handle kinda depends on our health.
     // let nearMonsters = Math.floor((5 * (1 / me.hpmax * me.hp)) + 1);
