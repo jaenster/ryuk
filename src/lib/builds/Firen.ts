@@ -109,8 +109,8 @@ const build: Build = {
       if (monster && ![sdk.monsters.Duriel, sdk.monsters.Diablo].includes(monster.classid)) {
 
         let count; // Avoid static'ing monsters an entire group of monsters for ever, every 4th static, want something else
-        if (!staticMap.has(monster)) staticMap.set(monster, count = 0);
-        count = staticMap.get(monster) + 1;
+        count = (staticMap.get(monster) | 0) + 1;
+        staticMap.set(monster, count);
 
         if (count < 4 && monster && Attack.checkResist(monster, "lightning") && data.static.dmg > Math.max(data.fireBolt.dmg, data.fireBall.dmg)) {
           // Actually make the bot walk to up to the monster and static, as this is the best decision
@@ -119,7 +119,7 @@ const build: Build = {
             return [sdk.skills.StaticField, 0];
           }
         } else {
-          // If we dont decide to static, remove the counter
+          // If we don't decide to static, remove the counter
           staticMap.delete(monster)
         }
       }
