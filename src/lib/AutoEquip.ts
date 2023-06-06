@@ -29,10 +29,8 @@ class AutoEquip {
   private compareRetAll(items) {
     return items.filter((item: ItemUnit) => {
       return (item instanceof Unit ? this.formula(item) : item) > -Infinity;
-    }).sort(this.sortItems);
+    }).sort(this.itemSortFn());
   }
-
-  private readonly sortItems: (a, b) => number;
 
   private readonly forUnit: 'merc' | 'me';
   private readonly cachedWanted: Map<number/*gid*/, 'AEM' | 'AE' | 0 | -1> = new Map();
@@ -218,7 +216,6 @@ class AutoEquip {
       if (!found) {
         this.cachedWanted.set(item.gid, 0);
         this.cacheCalced.set(item.gid, -1337);
-        console.log('here1234?');
         return false;
       }
     }
@@ -228,12 +225,10 @@ class AutoEquip {
     if (old && old.unequiped && old.unequiped.length) {
       const newTier = this.formula(old.unequiped.first());
       if (newTier > tier) {
-        console.log('here? rollback')
         return !!old.rollback(); // Rollback and return
       }
     }
 
-    console.log('here? did?')
     return true;
   }
 
@@ -375,6 +370,19 @@ class AutoEquip {
       .map(obj => obj.item);
   };
 
+  itemSortFn(){
+    return (a: number | ItemUnit, b: number | ItemUnit) => {
+      let fa = typeof a === 'number' ? a : this.formula(a);
+      let fb = typeof b === 'number' ? b : this.formula(b);
+      if (fb === fa && typeof a !== 'number' && typeof b !== 'number') {
+
+        if (a.isEquipped && b.isEquipped) return 0;
+        return a.isEquipped ? -1 : 1;
+      }
+      return fb - fa;
+    }
+  }
+
   constructor(formula: (item: ItemUnit) => number,
               equipHandler: (bodyLoc: number, item: ItemUnit) => undefined | {
                 rollback: () => {},
@@ -384,17 +392,6 @@ class AutoEquip {
               forUnit: 'merc' | 'me' = 'me') {
     this.formula = formula;
     this.forUnit = forUnit;
-
-    this.sortItems = (a: number | ItemUnit, b: number | ItemUnit) => {
-      let fa = typeof a === 'number' ? a : this.formula(a);
-      let fb = typeof b === 'number' ? b : this.formula(b);
-      if (fb === fa && typeof a !== 'number' && typeof b !== 'number') {
-
-        if (a.isEquipped && b.isEquipped) return 0;
-        return a.isEquipped ? -1 : 1;
-      }
-      return fb - fa;
-    };
 
     this.equipHandler = equipHandler;
 
@@ -783,11 +780,16 @@ Pickit.on('identifiedItem', itemEvent)
 new Override(Item, Item.autoEquip, function (original) {
   //ToDo; We got time to actually equip items right now
 
+  // Not in trade, just in menu. Cancel that as we cant run auto equip while that is happening
   (getInteractedNPC() || undefined)?.itemcount === 0 && me.cancel();
+
+  const time = getTickCount();
   console.log('Running auto equipment');
   (me.getItems() || [])
     .filter(item => item.identified && (item.isInInventory || item.isInStash))
     .forEach(itemEvent);
+  console.log('Auto equipment ran for '+(getTickCount()-time)+'ms')
+
 }).apply();
 
 new Override(Item, Item.autoEquipCheck, function (original, item) {

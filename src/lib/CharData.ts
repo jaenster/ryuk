@@ -178,7 +178,7 @@ if (getScript(true).name.toString() === 'default.dbj') {
 
 Messaging.on('CharDataUpdate', (updatedCharData: Partial<CharData>) => {
   // @ts-ignore
-  console.debug(getScript(true).name, 'Updated -> ', updatedCharData)
+  // console.debug(getScript(true).name, 'Updated -> ', updatedCharData)
   updateRecursively(charData, updatedCharData);
   oldData = JSON.stringify(charData);
 })

@@ -1669,7 +1669,7 @@ declare global {
 
   function sha512_file(str: string): string
 
-  function checkCollisionBetween(x1: number, y1: number, x2: number, y2: number, size: number, collision: number)
+  function checkCollisionBetween(x1: number, y1: number, x2: number, y2: number, size: number, collision: number): number
 
   function print(any: string): void
 
