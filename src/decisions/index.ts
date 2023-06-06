@@ -340,16 +340,6 @@ export default function (): Decision {
       }
     ];
 
-    if (me.act === 1 && me.inTown && me.getQuest(0, 0) === 0) {
-      console.log('Warriv test');
-
-      const warriv = getUnit(1, NPC.Warriv);
-      // Do quest talked with warriv
-      sendPacket(1, 0x31, 4, warriv.gid, 4, 0x0)
-    } else {
-      console.log('talked with warriv');
-    }
-
     do {
       let filtered = talkTree.filter(el => {
         const town = getTownForQuest(el.quest);
@@ -591,7 +581,7 @@ export default function (): Decision {
         {
           name: 'FarOasis',
           level: {
-            max: 20,
+            max: 18,
           },
           do() {
             return gotWp(sdk.areas.FarOasis)
