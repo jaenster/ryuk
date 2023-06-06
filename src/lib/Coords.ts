@@ -45,7 +45,7 @@ export enum BlockBits {
 
 export enum Collision {
   // Collisions that cause a missile to burst
-  BLOCK_MISSILE = BlockBits.PlayerToWalk | BlockBits.LineOfSight | BlockBits.ClosedDoor | BlockBits.Ranged,
+  BLOCK_MISSILE = BlockBits.PlayerToWalk | BlockBits.LineOfSight | BlockBits.ClosedDoor | BlockBits.Ranged | BlockBits.BlockWall,
 }
 
 export function getCoordsBetween(x1: number, y1: number, x2: number, y2: number): { x: number, y: number }[] {
@@ -153,8 +153,10 @@ type MinimalMonster = PathNode & { area: number };
 
 export function findCastingSpotSkill(skill: number, unit: MinimalMonster, minRange: number = 5, thickness: number = 5, collision: number = Collision.BLOCK_MISSILE): PathNode {
   const range = Skill.getRange(skill);
-  console.log('Searching range for', skill, Object.keys(sdk.skills).find(el => sdk.skills[el] === skill), range);
-  return findCastingSpotRange(range, unit, minRange, thickness, collision);
+  const tick = getTickCount()
+  const spot = findCastingSpotRange(range, unit, minRange, thickness, collision);
+  print(getTickCount()-tick+' ms');
+  return spot;
 }
 
 
@@ -164,7 +166,6 @@ export function findCastingSpotRange(range: number, unit: MinimalMonster, minRan
       if (checkCollisionBetween(a.x, a.y, me.x, me.y, 7, BlockBits.BlockWall)) return 1;
       return a.distance - b.distance;
     })
-  console.log(spots);
   return spots.find(a => {
     const dist = getDistance(unit.x, unit.y, a.x, a.y);
     return dist < range && dist > minRange;
@@ -174,13 +175,12 @@ export function findCastingSpotRange(range: number, unit: MinimalMonster, minRan
 const lines = [];
 
 export function getSpotsFor(collision: number, thickness: number, unit: MinimalMonster) {
+  let spots: (PathNode&{n: number})[] = [];
 
-  let spots: PathNode[] = [];
+  const fieldSize = 50;
 
-  const fieldSize = 75;
-
-  for (let oX = -fieldSize; oX < fieldSize; oX++) {
-    for (let oY = -fieldSize; oY < fieldSize; oY++) {
+  for (let oX = -fieldSize; oX < fieldSize; oX+=3) {
+    for (let oY = -fieldSize; oY < fieldSize; oY+=3) {
       const [x, y] = [unit.x + oX, unit.y + oY];
 
       if (getDistance(unit.x, unit.y, x, y) > 40) continue;
@@ -193,15 +193,37 @@ export function getSpotsFor(collision: number, thickness: number, unit: MinimalM
       }
       // if it isnt a collision to start with
       if (!isCol) {
-        spots.push({x, y});
+        spots.push({x, y, n: 0});
       }
     }
   }
 
   spots = spots.filter(el => !checkCollisionBetween(el.x, el.y, unit.x, unit.y, thickness, collision))
 
+  // Calculate the far edge spots (todo: Improve speed?)
+  const all = [];
+  for(const spot of spots) {
+    for(const other of spots) {
+      if (spot === other) continue;
+      const d = getDistance(spot, other);
+      if (d < 5) {
+        spot.n += 1;
+      }
+    }
+    all.push(spot.n);
+  }
+  const avg = all.reduce((acc, cur) => acc+cur, 0) / all.length
+
   lines.splice(0, lines.length);
-  spots.map(({x, y}) => lines.push(new Line(x + 1, y + 1, x, y, 0x70, true)));
+  spots = spots.filter(({x, y, n}) => {
+    if (n < avg) { // below avg
+      lines.push(new Line(x + 1, y + 1, x, y, 0x62, true))
+      return false;
+    } else { // not below avg
+      lines.push(new Line(x + 1, y + 1, x, y, 0x84, true))
+      return true;
+    }
+  });
   return spots;
 
 }
