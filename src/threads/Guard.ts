@@ -69,7 +69,7 @@
 
                 this.hooks = [];
                 this.x = 500;
-                this.y = 600 - (400 + (self.hooks.length * 15));
+                this.y = 600 - (400 + ((self.hooks.length + 6) * 15));
                 // this.box = new Box(this.x-2, this.y-20, 250, (self.hooks.length * 15), 0, 0.2);
 
 
@@ -79,7 +79,8 @@
 
                 this.update = () => {
                     stack = myStack.match(/[^\r\n]+/g);
-                    stack = stack && stack.slice(6/*skip path to here*/, -6).map(el => {
+                    // stack = stack && stack.slice(6/*skip path to here*/, -6).map(el => {
+                    stack = stack && stack.map(el => {
                         let line = el.substr(el.lastIndexOf(':') + 1),
                           functionName = el.substr(0, el.indexOf('@')),
                           filename = el.substr(el.lastIndexOf('\\') + 1);

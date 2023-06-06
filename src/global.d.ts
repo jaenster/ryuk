@@ -656,7 +656,7 @@ declare global {
     click(button, shift, unit: Unit): void,
     click(button, shift, x, y): void,
     inMyParty(name): void,
-    findPlayer(name): void,
+    findPlayer(name): Unit,
     getPlayerUnit(name): void,
     getPlayerAct(player): void,
     getNearbyPlayerCount(): void,
@@ -718,7 +718,7 @@ declare global {
     journeyTo(area): boolean,
     plotCourse(dest, src): false | { course: number[] },
     areasConnected(src, dest): void,
-    getAreaName(area): void,
+    getAreaName(area): string,
   }
 
   const Skill: {
@@ -894,8 +894,6 @@ declare global {
     deploy(unit: Unit, distance, spread, range): void
     getMonsterCount(x, y, range, list): void
     buildGrid(xmin, xmax, ymin, ymax, spread): void
-    checkMonster(unit: Unit): boolean
-    skipCheck(unit: Unit): boolean
     getSkillElement(skillId): void
     getResist(unit: Unit, type): void
     checkResist(unit: Unit, type: "physical" | "fire" | "lightning" | "magic" | "cold" | "poison" | "none", maxres?): boolean
@@ -1192,7 +1190,7 @@ declare global {
 
     getEnchant(type: number): boolean;
 
-    openMenu(): boolean;
+    openMenu(i?:number): boolean;
 
     readonly isChampion: boolean;
 
@@ -1491,7 +1489,7 @@ declare global {
 
   function getDialogLines(): { handler() }[] | false
 
-  function print(what: string): void
+  function print(what: string|number): void
 
   function stringToEUC(arg): []
 

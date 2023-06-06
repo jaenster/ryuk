@@ -63,10 +63,6 @@ Attack.weaponSwitch ||= function (...args) {
   me.switchWeapons(...args)
 }
 
-Attack.checkMonster ||= function (monster) {
-  return (monster).attackable;
-}
-
 new Override(Attack, Attack.clear, function (original, range = 25, spectype = 0, bossId = false, sortfunc = this.sortMonsters, pickit = true) { // probably going to change to passing an object
   while (!me.gameReady) {
     delay(40);
@@ -103,7 +99,7 @@ new Override(Attack, Attack.clear, function (original, range = 25, spectype = 0,
   let target: Monster = getUnit(1);
   if (target) {
     do {
-      if ((!spectype || (target.spectype & spectype)) && this.checkMonster(target) && this.skipCheck(target)) {
+      if ((!spectype || (target.spectype & spectype)) && target.attackable) {
         // Speed optimization - don't go through monster list until there's at least one within clear range
         if (!start && getDistance(target, orgx, orgy) <= range &&
           (me.getSkill(54, 1) || !Scripts.Follower || !checkCollision(me, target, 0x1))) {
@@ -130,7 +126,7 @@ new Override(Attack, Attack.clear, function (original, range = 25, spectype = 0,
 
     target = copyUnit(monsterList[0]);
 
-    if (target.x !== undefined && (getDistance(target, orgx, orgy) <= range || (this.getScarinessLevel(target) > 7 && getDistance(me, target) <= range)) && this.checkMonster(target)) {
+    if (target.x !== undefined && (getDistance(target, orgx, orgy) <= range || (this.getScarinessLevel(target) > 7 && getDistance(me, target) <= range)) && target.attackable) {
       if (Config.Dodge && me.hp * 100 / me.hpmax <= Config.DodgeHP) {
         this.deploy(target, Config.DodgeRange, 5, 9);
       }
@@ -214,7 +210,7 @@ new Override(Attack, Attack.kill, function (original, classId) {
 
   gid = target.gid;
 
-  while (attackCount < Config.MaxAttackCount && this.checkMonster(target) && !this.skipCheck(target)) {
+  while (attackCount < Config.MaxAttackCount && target.attackable) {
     Misc.townCheck();
 
     if (!target || !copyUnit(target).x) { // Check if unit got invalidated, happens if necro raises a skeleton from the boss's corpse.

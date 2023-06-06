@@ -1783,6 +1783,7 @@ const sdk = {
     Ancient2: 669,
     Ancient3: 670,
     Andariel: 156,
+    Anya: 512,
     Apparition: 41,
     Arach1: 122,
     Arach2: 685,

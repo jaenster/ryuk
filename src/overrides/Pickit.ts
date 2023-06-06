@@ -70,8 +70,8 @@ Pickit.pickOnPath = function (this: PickitInstance, path) {
       let item = items[i];
 
       // If any of the future paths are more close to this item, dont get it now
-      if (smallPath.some(path => getDistance(item, current)+10 > getDistance(item, path))) {
-        // console.log('Skip item, '+item.name+' for a future path');
+      if (smallPath.some(path => getDistance(item, current) > getDistance(item, path)+10)) {
+        console.log('Skip item, '+item.name+' for a future path');
         items.splice(i--, 1);
       } else {
         // console.log('Checking item now, '+item.name);

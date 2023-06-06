@@ -32,6 +32,10 @@
   if (thread === 'thread') {
     require('../overrides/D2BSImprovements')
     const worker = require('../lib/Worker').default;
+    const charData = require('../lib/CharData').default;
+
+    const startTime = new Date(charData.timing.start);
+    const runTime = () => new Date((+(new Date()) - +startTime)).toISOString().split('.')[0].substring(11)
 
     const timer = (tick => new Date(getTickCount() - tick).toISOString().slice(14, -3)).bind(null, getTickCount());
 
@@ -100,7 +104,7 @@
             ].join(' ')).bind(null, [[0, -20, -50], [0, -40, -100]][me.gametype][me.diff])
         )
       );
-      this.hooks.push(new updateableText(() => '- Jaenster -                                           Game time: ' + timer()));
+      this.hooks.push(new updateableText(() => '- Jaenster -            Total time: '+runTime()+'    Game time: ' + timer()));
 
       // @ts-ignore
       this.hooks.push(new Box(this.x + 210 + 2, this.y - 15, Math.round(800 / 2), self.hooks.length * 7.5 - 4, 0x0, 1, 2));

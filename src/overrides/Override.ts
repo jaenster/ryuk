@@ -16,7 +16,6 @@ export class Override<T extends object, M extends ((...args: any) => any)> {
           // D2bs sometimes throws an error on a magic getter, so dont call those by reading target[key]
           const property = Object.getOwnPropertyDescriptor(target, key);
           if (!property || typeof property.get === 'function') {
-            print(key);
             return false; // Dont trigger getter
           }
           return target[key] === original;

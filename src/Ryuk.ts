@@ -7,7 +7,6 @@ import {respec} from "./lib/AutoBuild"
 
 import decisions from "./decisions/index";
 import {Decision} from "./decisions/decision";
-import sdk from "./sdk";
 import {gameData} from "./lib/CharData";
 
 console.log('Loaded Ryuk base files');
@@ -23,7 +22,6 @@ export default function () {
 
   // @ts-ignore Load once all is loaded
   ['TownChicken'].forEach(key => require("./lib/" + key));
-
 
   let decision: Decision;
   do {
