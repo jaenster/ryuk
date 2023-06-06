@@ -23,6 +23,16 @@ declare global {
     flat(depth?: number): T[];
 
     compactMap(callback: (value: T, index: number, obj: T[]) => any, thisArg?: any): any[];
+
+    groupBy<K extends (string | symbol)>(
+      callback: (value: T, index: number, array: T[]) => K,
+      thisArg?: any
+    ): { [P in K]: T[] }
+
+    groupByToMap<K>(
+      callback: (value: T, index: number, array: T[]) => K,
+      thisArg?: any
+    ): Map<K, T[]>
   }
 
   interface String {
@@ -1233,6 +1243,7 @@ declare global {
     getStatEx(one: number, sub?: number);
 
     act: any;
+    inTown: boolean;
     mode: number;
     idle: boolean;
     type: UnitType;
@@ -1306,7 +1317,7 @@ declare global {
 
     equip(destination: number | undefined, item: ItemUnit);
 
-    findItem(arg0?: number | string, arg1?: number, arg2?: number);
+    findItem(arg0?: number | string, arg1?: number, arg2?: number): ItemUnit;
 
     ping: number;
     itemcount: number;
@@ -1315,7 +1326,6 @@ declare global {
     staminamax: number;
     stamina: number;
     runwalk: number;
-    inTown: boolean;
     gametype: 0 | 1;
     ingame: boolean;
     diff: 0 | 1 | 2;

@@ -83,7 +83,6 @@ export = function (settings: { spots: { [data: string]: Spot }, default: string,
       let dodge = monster && !monster.dead && shouldDodge(me/*depends on me*/);
 
       if (dodge) {
-        print('DODGE');
         spot = safeSpots[calcNewSpot()];
         if (getUnit(3, 172)) {
           console.log('For diablos lighting we rather walk to the other spot to avoid getting pwned with the lighting');

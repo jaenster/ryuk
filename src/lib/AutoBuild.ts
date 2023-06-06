@@ -25,7 +25,6 @@ declare global {
 
 
 export function respec() {
-
   const respecToBuild = builds.find(build => build.valid() && !!build.respec());
   if (!respecToBuild) return;
 
@@ -40,10 +39,12 @@ export function respec() {
   }
 
   if (!me.getQuest(sdk.quests.DenOfEvil, 0)) {
-    Town.goToTown();
-    Town.doChores();
+    if (me.area !== sdk.areas.DenOfEvil) {
+      Town.goToTown();
+      Town.doChores();
 
-    Pather.journeyTo(sdk.areas.DenOfEvil);
+      Pather.journeyTo(sdk.areas.DenOfEvil);
+    }
     Attack.clearLevel();
   }
 
@@ -57,6 +58,8 @@ export function respec() {
       console.log('Respecing');
       sendPacket(1, 0x38, 4, 0, 4, npc.gid, 4, 0);
     }
+  } else {
+    console.log('Dont have quest to respec? wtf');
   }
 
 

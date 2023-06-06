@@ -1636,7 +1636,7 @@ const sdk = {
     },
     dialog: {
       youDoNotHaveEnoughGoldForThat: 3362
-    }
+    },
   },
 
   player: {
