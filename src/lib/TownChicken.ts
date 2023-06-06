@@ -8,7 +8,7 @@ const Config = {
   disabled: false,
 }
 
-let recursion = true;
+let recursion = false;
 
 // @ts-ignore // Only load this shit in global scope
 if (getScript(true).name.toLowerCase() === 'default.dbj') {
