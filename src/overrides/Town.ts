@@ -597,11 +597,14 @@ new Override(Town, Town.clearInventory, function () {
                 }
                 break;*/
               case PickitResult.NONE: // Drop item
-                  if ((getUIFlag(0x0C) || getUIFlag(0x08)) && (item.getItemCost(1) <= 1 || item.isQuestItem)) { // Quest items and such
-                      me.cancel();
+                  // Quest items and such
+                  if ((getUIFlag(sdk.uiflags.Shop) || getUIFlag(sdk.uiflags.NPCMenu)) && (item.getItemCost(1) <= 1 || item.isQuestItem)) {
+                      me.cancel() && me.cancel();
                       delay(200);
+                      item.drop(); // Drop the item
+                  } else {
+                      item.sellOrDrop();
                   }
-                  item.sellOrDrop();
                   break;
               case PickitResult.GOLD: // Sell item
                   try {

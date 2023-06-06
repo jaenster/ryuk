@@ -431,25 +431,39 @@ Unit.prototype.equip = function (destLocation: number | number[] = undefined, it
     return true;
   }
 
+  const getMenuId = () => {
+    const npc = getInteractedNPC();
+    if (!npc) return 0;
+    switch(npc.classid) {
+      case sdk.monsters.Charsi:
+      case sdk.monsters.Fara:
+      case sdk.monsters.Hratli:
+      case sdk.monsters.Halbu:
+      case sdk.monsters.Larzuk:
+        return sdk.menu.TradeRepair;
+      case sdk.monsters.Gheed:
+      case sdk.monsters.Elzix:
+      case sdk.monsters.Alkor:
+      case sdk.monsters.Jamella:
+      case sdk.monsters.Anya:
+        return mode === 'Gamble' ? sdk.menu.Gabmle : sdk.menu.Trade
+    }
+    return sdk.menu.Trade;
+  };
+
+
   var i, tick,
     menuId = mode === "Gamble" ? 0x0D46 : mode === "Repair" ? 0x0D06 : 0x0D44;
 
   for (i = 0; i < 3; i += 1) {
     if (this.openMenu(i)) { // Incremental delay on retries
-      Misc.useMenu(menuId);
+      Misc.useMenu(getMenuId());
 
-      tick = getTickCount();
-
-      while (getTickCount() - tick < 1000) {
-        if (getUIFlag(0x0C) && this.itemcount > 0) {
-          delay(200);
-
-          return true;
-        }
-
-        delay(25);
+      if (Misc.poll(() => getUIFlag(sdk.uiflags.Shop) && this.itemcount > 0, 1000, 25)) {
+        return true;
       }
 
+      console.log('Retry interacting with NPC');
       me.cancel();
     }
   }
