@@ -15,6 +15,9 @@ new Override(Loader, Loader.loadScripts, function () {
   }
 
   for (s in Scripts) {
+    // Skip test script. Only set on true so default.dbj doesn't mess with town stuff on game join
+    if (s === 'Test') continue;
+
     if (Scripts.hasOwnProperty(s) && Scripts[s]) {
       this.scriptList.push(s);
     }

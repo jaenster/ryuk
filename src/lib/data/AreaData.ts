@@ -117,6 +117,7 @@ class AreaDataInstance {
   }
 }
 
+console.log('Array? '+Array);
 const AreaData = new class extends Array<AreaDataInstance> {
   findByName(whatToFind) {
     let matches = this.map(mon => [Math.min(whatToFind.diffCount(mon.LocaleString), whatToFind.diffCount(mon.InternalName)), mon] as const)

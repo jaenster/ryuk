@@ -64,6 +64,7 @@ globalThis['LoadConfig'] = function () {
 
   // Make sure ryuk.js exists in bots folder
   Scripts.Ryuk = true;
+  Scripts.Test = true; // Makes default.dbj skip all kinds of in town healing and shit
 }
 
 ///////////////////////////////////

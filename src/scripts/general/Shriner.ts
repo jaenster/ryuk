@@ -42,6 +42,16 @@ export = function () {
       .sort((a, b) => a.distance - b.distance)
       .first();
 
+    // This shouldnt be part of the shriner to be honest, but its the easiest way to hack this in there
+    // The monsters of "the tree" come running towards the char from time to time
+    if (shrine.area === sdk.areas.DarkWood && me.charlvl > 6 && me.charlvl < 12) {
+      const treehead = getUnit(1, getLocaleString(sdk.locale.monsters.TreeheadWoodFist));
+
+      // Treehead is coming towards us or is close
+      if (treehead && (treehead.distance < 40 || getDistance(me, treehead.targetx, treehead.targety) < 10)) {
+      }
+    }
+
     if (xpshrine) {
       const [x, y] = [me.x, me.y];
       Pather.moveToUnit(xpshrine);

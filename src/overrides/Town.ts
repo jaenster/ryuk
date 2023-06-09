@@ -5,6 +5,7 @@ import {Events} from "../lib/Events";
 import {sortInventory} from "../lib/utilities";
 import {AutoRunewords} from "../lib/AutoRuneword";
 import {getWp, getWpPreset, gotoWp, talkTo} from "../scripts/util";
+import Shopper from "../lib/town/actions";
 
 // Additions
 declare global {
@@ -170,12 +171,8 @@ Town.buyStaminaPotions = function (this: TownInstance) {
 };
 
 
-new Override(Town, Town.doChores, (original, ...args) => {
-    original()
-})
 
 new Override(Town, Town.clearScrolls, function () {
-
     me.getItemsEx()
       .filter(i =>
         i.location === sdk.storage.Inventory &&

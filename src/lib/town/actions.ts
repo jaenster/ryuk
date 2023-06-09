@@ -13,6 +13,7 @@ export default class Shopper {
     while (!me.gameReady) delay(3);
 
     const dependencies = new Set<string>();
+    console.log('here?');
 
     const tasks: ShopTask[] = [];
     for (const action of this.actions) {
@@ -130,7 +131,6 @@ export abstract class ShopAction<T = any> {
     const interactedWith = getInteractedNPC();
     if (unit && interactedWith && interactedWith.classid === unit.classid) {
       const menuId = this.getMenuId();
-      console.log('menuid -- ' + menuId);
       Misc.useMenu(menuId);
 
       if (Misc.poll(() => getUIFlag(sdk.uiflags.Shop) && interactedWith.itemcount > 0, 1000, 25)) {

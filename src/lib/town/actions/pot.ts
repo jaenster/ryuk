@@ -32,6 +32,9 @@ export const pot = new class Pot extends ShopAction<PotStorage> {
   readonly npcFlag: number = NpcFlags.POTS;
 
   check(storage: PotStorage): Urgency {
+    if (me.gold < 1000) {
+      return Urgency.Not;
+    }
     storage.beltSize = Storage.BeltSize();
 
     // stats for hp belt

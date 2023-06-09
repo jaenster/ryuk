@@ -1,6 +1,7 @@
 import {Override} from "../overrides/Override";
 import sdk from "../sdk";
-import {CharClasses, PickitResult, Qualities, StorageLocations} from "../enums";
+import {PickitResult, Qualities} from "../enums";
+import {clear, ClearHook} from "./town/actions/clearInventory";
 
 const dependencies = {};
 dependencies[sdk.itemtype.bow] = sdk.items.arrows;
@@ -370,7 +371,7 @@ class AutoEquip {
       .map(obj => obj.item);
   };
 
-  itemSortFn(){
+  itemSortFn() {
     return (a: number | ItemUnit, b: number | ItemUnit) => {
       let fa = typeof a === 'number' ? a : this.formula(a);
       let fb = typeof b === 'number' ? b : this.formula(b);
@@ -390,7 +391,11 @@ class AutoEquip {
                 success: boolean
               },
               forUnit: 'merc' | 'me' = 'me') {
-    this.formula = formula;
+    this.formula = (item) => {
+      const result =  formula(item);
+      // console.debug('Item tier '+item.name+'@'+forUnit+' = '+result)
+      return result
+    }
     this.forUnit = forUnit;
 
     this.equipHandler = equipHandler;
@@ -747,7 +752,6 @@ export const mercAutoEquip = me.gametype && new AutoEquip(function formula(item:
 
 // All this is custom, dont do anything with kolbots auto equip as it sucks and i dont like nip
 Pickit.on('checkItem', function (item, result) {
-
   [personalAutoEquip, mercAutoEquip].filter(e => e).some((aq) => {
     const tmpResult = aq.checkItem(item);
     switch (tmpResult) {
@@ -788,10 +792,23 @@ new Override(Item, Item.autoEquip, function (original) {
   (me.getItems() || [])
     .filter(item => item.identified && (item.isInInventory || item.isInStash))
     .forEach(itemEvent);
-  console.log('Auto equipment ran for '+(getTickCount()-time)+'ms')
+
+  console.log('Auto equipment ran for ' + (getTickCount() - time) + 'ms')
 
 }).apply();
 
 new Override(Item, Item.autoEquipCheck, function (original, item) {
   return personalAutoEquip.checkItem(item) || (mercAutoEquip && mercAutoEquip.checkItem(item));
 });
+
+new class AutoEquip implements ClearHook {
+
+  constructor() {
+    clear.registerHook(PickitResult.RYUK_AEQUIP_MERC, this)
+    clear.registerHook(PickitResult.RYUK_AEQUIP, this)
+  }
+
+  handleItem(item: ItemUnit) {
+    Item.autoEquipCheck(item);
+  }
+}

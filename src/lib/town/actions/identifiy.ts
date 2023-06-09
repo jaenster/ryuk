@@ -17,7 +17,8 @@ export const identify = new class Identify<T = object> extends ShopAction<T> {
 
   check(): Urgency {
     const inventory: ItemUnit[] = (Storage.Inventory.Compare(Config.Inventory) || [])
-      .filter(i => i.isInInventory && !i.identified);
+      .filter(i => i.isInInventory && !i.identified)
+      .filter(i => Pickit.checkItem(i)?.result === PickitResult.TO_IDENTIFY)
 
     // ToDo; check if x% of space is taken to consider if its needed or convenience
     return inventory.length === 0 ? Urgency.Not : Urgency.Needed;
@@ -46,7 +47,7 @@ export const identify = new class Identify<T = object> extends ShopAction<T> {
       this.perItem(item);
     }
 
-    return false;
+    return true;
   }
 
   get idTool() {
@@ -65,8 +66,8 @@ export const identify = new class Identify<T = object> extends ShopAction<T> {
   }
 
   perItem(item: ItemUnit) {
+    if (!item.isInInventory || item.identified) return false;
     console.log('Per item run ' + item.name + ' - Identified: ' + item.identified);
-    if (!item.isInInventory) return false;
     const npc = getInteractedNPC();
     //ToDO ignored types
 

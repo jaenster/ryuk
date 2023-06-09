@@ -981,7 +981,7 @@ declare global {
     doCubing(): void
     cursorCheck(): void
     openCube(): void
-    closeCube(): void
+    closeCube(): boolean
     emptyCube(): void
     makeRevPots(): void
   }
@@ -1501,7 +1501,7 @@ declare global {
 
   function getIsTalkingNPC(): boolean
 
-  function getDialogLines(): { handler() }[] | false
+  function getDialogLines(): ({ handler(), text: string })[] | false
 
   function print(what: string|number): void
 

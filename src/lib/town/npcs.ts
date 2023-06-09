@@ -37,7 +37,7 @@ export const NpcStats = {
   get [Npc.Akara]() {
     return NpcFlags.ACT1 | NpcFlags.TALK | NpcFlags.HEAL | NpcFlags.TRADE | (me.getQuest(41, 0) ? NpcFlags.RESPEC : 0) | NpcFlags.ALLSHOP;
   },
-  [Npc.Gheed]: NpcFlags.ACT1 | NpcFlags.TALK | NpcFlags.GAMBLE | NpcFlags.TRADE,
+  [Npc.Gheed]: NpcFlags.ACT1 | NpcFlags.TALK | NpcFlags.GAMBLE | NpcFlags.TRADE | NpcFlags.KEYS,
   [Npc.Charsi]: NpcFlags.ACT1 | NpcFlags.TALK | NpcFlags.REPAIR | NpcFlags.TRADE,
   get [Npc.Kashya]() {
     return NpcFlags.ACT1 | NpcFlags.TALK | NpcFlags.RESURRECT | (me.getQuest(sdk.quests.SistersBurialGrounds, 0) || me.charlvl >= 8 ? NpcFlags.HIRE : 0);
