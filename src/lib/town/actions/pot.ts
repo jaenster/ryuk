@@ -88,7 +88,9 @@ export const pot = new class Pot extends ShopAction<PotStorage> {
   }
 
   run(task: ShopTask<PotStorage>): boolean {
-    console.log('Buying pots');
+    const {storage} = task;
+    const key = ['bufferNeedHP', 'bufferHaveMP', 'beltNeedMP', 'beltNeedHP'];
+    console.log('Buying pots. '+key.map(key => storage[key] > 0 ? key+'='+storage[key]:'').join(''));
 
     const unit = this
       .goto(task.npc)
@@ -98,9 +100,6 @@ export const pot = new class Pot extends ShopAction<PotStorage> {
     if (!unit || !unit.itemcount) {
       return false;
     }
-
-    const {storage} = task;
-    console.log(storage);
 
     // ToDo; make proper rewrite
     let col = Town.checkColumns(storage.beltSize);
@@ -132,10 +131,10 @@ export const pot = new class Pot extends ShopAction<PotStorage> {
 
     // Buy buffer pots
     for (const [type, amount] of [['hp', storage.bufferNeedHP], ['mp', storage.bufferNeedMP]] as const) {
+      console.log('Buying '+type+' '+amount+' buffer pots');
       for (let i = 0; i < amount; i++) {
         const pot = Town.getPotion(getInteractedNPC(), type);
-
-        if (!pot || !Storage.Inventory.CanFit(pot) || pot.buy(false)) {
+        if (!pot || !Storage.Inventory.CanFit(pot) || !pot.buy(false)) {
           break;
         }
       }

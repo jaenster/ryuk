@@ -17,7 +17,6 @@ export default class Shopper {
     const tasks: ShopTask[] = [];
     for (const action of this.actions) {
       const storage = {};
-      console.log('Checking if'+action.type)
       const urgency = action.check(storage);
       if (urgency > Urgency.Not) {
 

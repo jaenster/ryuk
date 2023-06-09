@@ -39,8 +39,6 @@ export class Plan {
   }
 
   calculate() {
-    let startAct = me.act;
-
     const urgencies = this.tasks.groupBy(el => String(el.urgency)) as { [P in Urgency]?: ShopTask[] };
 
     const needed = urgencies[Urgency.Needed];
@@ -52,10 +50,10 @@ export class Plan {
     console.log('Want to '+needed.map(el => el.action.type).join(','));
     const neededFlags = needed.reduce((acc,cur) => acc | cur.action.npcFlag, 0);
     // Get all possible npc combinations
-    const groups = Npcs.getGroups(neededFlags);
+    let groups = Npcs.getGroups(neededFlags);
+
     const routes = [] as Route[];
     console.log('Calculating all routes. Having '+groups.length+' options');
-
     for(const group of groups) {
       let current: Node = {act: me.act, x: me.x, y: me.y, npc: undefined as Npc, tasks: [] as ShopTask[], d: 0};
       const nodes = [] as Node[];

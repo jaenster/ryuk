@@ -1026,3 +1026,37 @@ Object.defineProperty(Town.tasks[1], 'Shop', {
 
 // Add events to town
 Object.keys(Events.prototype).forEach(key => Town[key] = Events.prototype[key]);
+
+new Override(Town, Town.visitTown, function (original, repair){
+    if (me.inTown) {
+        Shopper.run();
+        return true;
+    }
+
+    if (!this.canTpToTown()) return false;
+
+    let preArea = me.area;
+    let preAct = me.act;
+
+    // not an essential function -> handle thrown errors
+    try {
+        this.goToTown();
+    } catch (e) {
+        return false;
+    }
+
+    Shopper.run();
+
+    me.act !== preAct && this.goToTown(preAct);
+    this.move("portalspot");
+
+    if (!Pather.usePortal(null, me.name)) {
+        try {
+            Pather.usePortal(preArea, me.name);
+        } catch (e) {
+            throw new Error("Town.visitTown: Failed to go back from town");
+        }
+    }
+
+    return true;
+})

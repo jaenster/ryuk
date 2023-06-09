@@ -41,6 +41,6 @@ export enum Npc {
   Cain = 'Cain',
 
   // Not exactly but whatever
-  Stash = 'Stash',
+  Stash = 'stash', // Lower case as its a location and not a name
 }
 

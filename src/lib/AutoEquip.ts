@@ -43,6 +43,7 @@ class AutoEquip {
   }
 
   private calcCheckItem(item: ItemUnit) {
+    console.log('Checking item '+item.name)
     if (!item) {
       return PickitResult.NONE; // We dont want an item that doesnt exists
     }
@@ -808,7 +809,9 @@ new class AutoEquip implements ClearHook {
     clear.registerHook(PickitResult.RYUK_AEQUIP, this)
   }
 
-  handleItem(item: ItemUnit) {
-    Item.autoEquipCheck(item);
+  handleItems(items: ItemUnit[]) {
+    for(const item of items) {
+      Item.autoEquip(); // Rewrite this to work better with all items in mind, and not per item
+    }
   }
 }

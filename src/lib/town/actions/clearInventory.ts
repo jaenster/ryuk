@@ -12,10 +12,13 @@ type Storage = {
 }
 
 export interface ClearHook {
-  handleItem(item: ItemUnit, pickit: PickitResult): void
+  handleItems(item: ItemUnit[], pickit: PickitResult): void
 }
 
-const ignoreTypes = [sdk.itemtype.book, sdk.itemtype.key, sdk.itemtype.healingpotion, sdk.itemtype.manapotion, sdk.itemtype.rejuvpotion];
+const ignoreTypes = [
+  sdk.itemtype.book, sdk.itemtype.key, sdk.itemtype.healingpotion, sdk.itemtype.manapotion,
+  sdk.itemtype.rejuvpotion, sdk.itemtype.scroll,
+];
 export const clear = new class ClearInventory extends ShopAction<Storage> {
   private readonly hooks = new Map<PickitResult, ClearHook[]>();
 
@@ -35,7 +38,7 @@ export const clear = new class ClearInventory extends ShopAction<Storage> {
       if (acc) return acc;
       const nip = Pickit.checkItem(item);
       const hooks = this.hooks.get(nip.result);
-      return hooks.length > 0;
+      return hooks?.length > 0;
     }, false)
 
     // ToDo; make it a convenience if certain free space is still available
@@ -60,18 +63,19 @@ export const clear = new class ClearInventory extends ShopAction<Storage> {
     const {drop, gold, identify, custom} = this.getGroups();
 
     // Custom handlers for pickit lines
-    for(const item of custom) {
+
+    const hooks = custom.groupBy(item => {
       const nip = Pickit.checkItem(item);
-      const hooks = this.hooks.get(nip.result);
-      if (hooks.length) {
-        console.log('Calling special handlers for item '+item.name)
-        hooks.forEach(hook => hook.handleItem(item, nip.result));
-      }
+      return nip.result as 'AE' | 'AEM';
+    });
+
+    for (const [key, items] of Object.values(hooks)) {
+      this.hooks.get(key)?.forEach(hook => hook.handleItems(items, key));
     }
 
     let inShop = unit && unit.itemcount;
-    for(const item of drop.concat(gold)) {
-      console.log('Getting rid of item'+item.name, inShop);
+    for (const item of drop.concat(gold)) {
+      console.log('Getting rid of item' + item.name, inShop);
       if (inShop) {
         item.sell();
       } else {

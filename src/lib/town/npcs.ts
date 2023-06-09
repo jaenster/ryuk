@@ -123,8 +123,11 @@ export namespace Npcs {
       for (let i = 0; i < check.length; i++) {
         const [npc, npcFlags] = check[i]
 
-        // This npc has one of the flags we need
-        if ((npcFlags & neededFlags) > 0) {
+        // This npc has one of the flags we still need
+        const npcNeededAbilities = npcFlags & neededFlags;
+        const alreadyHaveEverything = (groupFlags | npcNeededAbilities) === groupFlags;
+        const addThisNpc = npcNeededAbilities > 0 && !alreadyHaveEverything;
+        if (addThisNpc) {
           group.push(npc);
           groupFlags |= npcFlags;
 

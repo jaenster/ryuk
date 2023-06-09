@@ -180,6 +180,8 @@ declare global {
     on<S = this>(key: "initNPC", handler: (this: S, npc?: Monster) => void): this
 
     once<S = this>(key: "initNPC", handler: (this: S, npc?: Monster) => void): this
+
+    canTpToTown(): boolean;
   }
 
   const Town: TownInstance;

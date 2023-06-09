@@ -53,6 +53,7 @@ export default function () {
     } while (decision);
   } catch (e) {
     console.error(e.stack);
+    console.log(e.message);
     delay(5000);
     throw e;
   }
