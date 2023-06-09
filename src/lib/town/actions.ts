@@ -13,11 +13,11 @@ export default class Shopper {
     while (!me.gameReady) delay(3);
 
     const dependencies = new Set<string>();
-    console.log('here?');
 
     const tasks: ShopTask[] = [];
     for (const action of this.actions) {
       const storage = {};
+      console.log('Checking if'+action.type)
       const urgency = action.check(storage);
       if (urgency > Urgency.Not) {
 

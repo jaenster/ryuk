@@ -1,4 +1,5 @@
 import sdk from "../../sdk";
+import Shopper from "../../lib/town/actions";
 
 export = function () { // SiC-666 TODO: Rewrite this.
   print("coming barbies");
@@ -50,7 +51,7 @@ export = function () { // SiC-666 TODO: Rewrite this.
       break;
   }
 
-  Town.doChores();
+  Shopper.run();
 
   return true;
 };

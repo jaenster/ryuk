@@ -9,6 +9,7 @@ import sdk from "../../sdk";
 import {getClosestSpot, getMedianSpot, spotOnDistance} from "../util";
 import Diablo from "./Diablo";
 import moveTo from "../../lib/MoveTo";
+import Shopper from "../../lib/town/actions";
 
 export = function () {
   function glitch() {
@@ -70,7 +71,7 @@ export = function () {
   ];
 
   Config.PacketCasting = 0;
-  me.inTown && Town.doChores();
+  me.inTown && Shopper.run();
   let vizLayout: 0 | 1, seisLayout: 0 | 1, infLayout: 0 | 1;
 
   Pather.journeyTo(sdk.areas.ChaosSanctuary); // load this area up

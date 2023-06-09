@@ -207,6 +207,8 @@ new Override(Town, Town.clearScrolls, function () {
 
 
 new Override(Town, Town.doChores, function (original, repair?: boolean) {
+    console.error('Should not use doChores - '+(new Error).stack);
+    return;
     if (!me.inTown) this.goToTown();
     if (me.act === 2 && getDistance(5153, 5203, me.x, me.y) < 30) {
         if (talkTo(NPC.Warriv, false)) {

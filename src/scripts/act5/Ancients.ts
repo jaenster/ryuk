@@ -1,5 +1,6 @@
 import sdk from "../../sdk";
 import TownChicken from '../../lib/TownChicken'
+import Shopper from "../../lib/town/actions";
 
 export = function () {
 
@@ -28,7 +29,7 @@ export = function () {
 
     Town.goToTown(5);
     const [x, y] = [me.x, me.y];
-    Town.doChores();
+    Shopper.run();
     Town.goToTown(5);
     Pather.moveTo(x, y);
     Pather.usePortal(sdk.areas.ArreatSummit, null);

@@ -113,7 +113,6 @@ export const clear = new class ClearInventory extends ShopAction<Storage> {
     const items = this.getItems();
     const groups = items.groupBy(item => {
       const nip = Pickit.checkItem(item);
-      console.log('Pickit - '+item.name+' - '+nip.result);
       switch (nip.result) {
         case PickitResult.TO_IDENTIFY:
           return 'identify'

@@ -4,6 +4,7 @@ import sdk from "../../sdk";
 import moveTo from "../../lib/MoveTo";
 import {calculateSpots} from "../util";
 import {BlockBits} from "../../lib/Coords";
+import Shopper from "../../lib/town/actions";
 
 
 // Just fast diablo, stfu
@@ -148,7 +149,7 @@ export = function () {
     throw new Error("Failed to open seal (id " + classid + ")");
   };
 
-  Town.doChores();
+  Shopper.run()
   Pather.useWaypoint(107);
   this.initLayout();
   this.openSeal(395);

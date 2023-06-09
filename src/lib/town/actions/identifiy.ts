@@ -67,12 +67,10 @@ export const identify = new class Identify<T = object> extends ShopAction<T> {
 
   perItem(item: ItemUnit) {
     if (!item.isInInventory || item.identified) return false;
-    console.log('Per item run ' + item.name + ' - Identified: ' + item.identified);
     const npc = getInteractedNPC();
     //ToDO ignored types
 
     const nip = Pickit.checkItem(item);
-    console.log(item.name + ' -- pickit result ', nip);
 
     if (nip.result === PickitResult.TO_IDENTIFY) {
       let {idTool} = this;
