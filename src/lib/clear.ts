@@ -67,8 +67,8 @@ const exporting: {
     let missilesOnFloor = enhancedMissiles.filter(m => !!m.data)
       .filter(m => m.data.velocity === 0 && (m.data.minDamage > 0 || m.data.eMin > 0) && m.missile.hits(nearestNode));
     while (missilesOnFloor.length > 0 && settings.nodes.index > 0) {
-      console.log("missilesOnFloor");
-      console.log(missilesOnFloor);
+      // console.log("missilesOnFloor");
+      // console.log(missilesOnFloor);
       nodesBack += 1;
       settings.nodes.index -= 1;
       nearestNode = settings.nodes[settings.nodes.index];

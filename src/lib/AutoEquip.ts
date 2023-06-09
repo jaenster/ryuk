@@ -43,7 +43,6 @@ class AutoEquip {
   }
 
   private calcCheckItem(item: ItemUnit) {
-    console.log('Checking item '+item.name)
     if (!item) {
       return PickitResult.NONE; // We dont want an item that doesnt exists
     }
@@ -166,7 +165,6 @@ class AutoEquip {
 
     if (item.isInStash) {
       if (!Town.openStash()) {
-        console.log('here?');
         return false;
       }
     }
@@ -290,7 +288,6 @@ class AutoEquip {
 
       let failed;
       if (!item.identified) {
-        console.log('here?');
         failed = this.equip(item);
         this.cachedWanted.set(item.gid, 0);
         this.cacheCalced.set(item.gid, -Infinity);

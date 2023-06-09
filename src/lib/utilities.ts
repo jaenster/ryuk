@@ -97,7 +97,6 @@ export function sortInventory() {
     const doneSpots = [];
     onebyone.some(item => {
       const x = item.x, y = item.y;
-      // console.log('checking', item.name);
       const spot = findSpot(item);
       if (spot && !doneSpots.find((other) => other.x !== spot.x && other.y !== spot.y)) {
         if (spot.x < x) return false;

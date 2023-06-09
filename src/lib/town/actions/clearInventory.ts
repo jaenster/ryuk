@@ -54,7 +54,6 @@ export const clear = new class ClearInventory extends ShopAction<Storage> {
 
   run(task: ShopTask<Storage>): boolean {
     // ToDo; create so it doesnt need a shop
-    console.log(task.npc);
     const unit = this.goto(task.npc).interact().openShop();
     if (!unit || !unit.itemcount) {
       return false;
@@ -69,7 +68,7 @@ export const clear = new class ClearInventory extends ShopAction<Storage> {
       return nip.result as 'AE' | 'AEM';
     });
 
-    for (const [key, items] of Object.values(hooks)) {
+    for (const [key, items] of Object.entries(hooks)) {
       this.hooks.get(key)?.forEach(hook => hook.handleItems(items, key));
     }
 

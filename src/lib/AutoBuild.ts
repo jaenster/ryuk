@@ -179,7 +179,6 @@ me.on('canStat', function statHandler(availablePoints) {
     console.warn('No active build')
     return;
   }
-  console.log('Statting?');
 
   // credits to dzik for a big part of original code
   const checkStat = (stat, items) => {

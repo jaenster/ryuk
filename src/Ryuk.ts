@@ -34,8 +34,6 @@ export default function () {
       decision = decisions();
       if (decision) {
 
-
-        console.log('here', decision.type);
         gameData.scripts.push({
           startTime: new Date,
           name: decision.type,
@@ -54,7 +52,6 @@ export default function () {
   } catch (e) {
     console.error(e.stack);
     console.log(e.message);
-    delay(5000);
     throw e;
   }
 }

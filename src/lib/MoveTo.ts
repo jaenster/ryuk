@@ -259,7 +259,6 @@ export default function moveTo(
                 // Only very near items here
                 Pickit.pickItems(3, true);
             }
-            // console.log('after pick');
 
 
             // if shrine found, click on it
@@ -320,7 +319,6 @@ export default function moveTo(
                             for (let j = i; j < newIndex; j++) {
                                 const hookEvent = path[i + j]?.hook;
                                 if (hookEvent) {
-                                    console.log('Skipped nodes, ')
                                     hookEvent();
                                 }
                             }
