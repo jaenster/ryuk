@@ -39,5 +39,8 @@ export enum Npc {
   Qual_Kehk = 'QualKehk',
   Nihlathak = 'Nihlathak',
   Cain = 'Cain',
+
+  // Not exactly but whatever
+  Stash = 'Stash',
 }
 

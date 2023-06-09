@@ -6,10 +6,7 @@ import {PickitResult} from "../../../enums";
 import sdk from "../../../sdk";
 
 
-export class Identify extends ShopAction {
-  static {
-    new Identify();
-  }
+export const identify = new class Identify<T = object> extends ShopAction<T> {
 
   readonly type: string = 'identify';
   readonly npcFlag: number = NpcFlags.SCROLL;
@@ -68,46 +65,32 @@ export class Identify extends ShopAction {
   }
 
   perItem(item: ItemUnit) {
-    console.log('Per item run '+item.name+' - Identified: '+item.identified);
+    console.log('Per item run ' + item.name + ' - Identified: ' + item.identified);
     if (!item.isInInventory) return false;
     const npc = getInteractedNPC();
     //ToDO ignored types
 
     const nip = Pickit.checkItem(item);
-    console.log(item.name+' -- pickit result ', nip);
+    console.log(item.name + ' -- pickit result ', nip);
 
-    switch (nip.result) {
-      case PickitResult.TO_IDENTIFY:
-        let {idTool} = this;
-        if (!idTool) {
+    if (nip.result === PickitResult.TO_IDENTIFY) {
+      let {idTool} = this;
+      if (!idTool) {
 
-          // buy scroll from npc
-          const vendorScroll = npc && npc.getItem(sdk.items.idScroll);
-          if (!vendorScroll) return false; // cant id as it cant buy a scroll
+        // buy scroll from npc
+        const vendorScroll = npc && npc.getItem(sdk.items.idScroll);
+        if (!vendorScroll) return false; // cant id as it cant buy a scroll
 
-          // Buy scroll
-          if (Storage.Inventory.CanFit(vendorScroll)) vendorScroll.buy();
-          idTool = this.idTool;
-        }
+        // Buy scroll
+        if (Storage.Inventory.CanFit(vendorScroll)) vendorScroll.buy();
+        idTool = this.idTool;
+      }
 
-        // Cant id this
-        if (!idTool) return false;
-        if (this.identify(item, idTool)) {
-          console.log('Running pickit again');
-          // now that this item is identified
-          const nip = Pickit.checkItem(item);
-          if (nip.result === PickitResult.NONE || nip.result === PickitResult.GOLD) {
+      // Cant id this
+      if (!idTool) return false;
 
-            //ToDo; figure out if it can sell this
-            console.log('Sold '+item.name+' as its unwanted after id');
-            item.sell();
-          }
-        }
-        break;
-      case PickitResult.GOLD:
-        // Sell for money
-        item.sell();
-        return true;
+      // It sounds logical to sell or drop the item here, but this is the task of clear inventory, and not identify.
+      this.identify(item, idTool);
     }
 
     return true;

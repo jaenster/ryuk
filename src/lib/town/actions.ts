@@ -85,10 +85,6 @@ export abstract class ShopAction<T = any> {
     return [];
   }
 
-  sort(other: ShopAction): -1 | 0 | 1 {
-    return 0;
-  }
-
   private isAlreadyInteractedWith(npc: Npc) {
     const interactedNPC = getInteractedNPC();
     return interactedNPC && interactedNPC.name.toLocaleLowerCase() === npc.toLocaleLowerCase()

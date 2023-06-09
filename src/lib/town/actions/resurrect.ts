@@ -65,7 +65,7 @@ new class Resurrect extends ShopAction {
     }
   }
 
-  dependencies(): string[] {
+  override dependencies(): string[] {
     return [];
   }
 }

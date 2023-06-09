@@ -177,7 +177,7 @@ export const acts = (() => {
       if (me.act === 1 && me.inTown) {
         this.initialize();
         if (x < 1000) {
-          return [act1fireUnit[0] + x, act1fireUnit[1] + y];
+          return act1fireUnit ? [act1fireUnit[0] + x, act1fireUnit[1] + y] : [x,y];
         }
       }
 

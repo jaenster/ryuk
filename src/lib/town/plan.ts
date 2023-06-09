@@ -66,9 +66,14 @@ export class Plan {
 
       const didTasks = new Set<ShopTask>();
       for(const npc of group) {
-        const actOfNpc = Npcs.actOf(npc) - 1;
-        const distance = acts[actOfNpc].getDistance(current, npc);
-        const [x,y] = acts[actOfNpc].getLocationRelative(npc);
+
+        const npcActs = Npcs.actsOf(npc);
+
+        // If this npc is available in multiple acts (e.g. cain/stash), select current act, OR, first
+        const act = npcActs.find(el => el === current.act) ?? npcActs.first();
+
+        const distance = acts[act-1].getDistance(current, npc);
+        const [x,y] = acts[act-1].getLocationRelative(npc);
         // ToDo; stop here if distance is already bigger as current lowest
 
         // Get tasks to be done here
@@ -91,7 +96,7 @@ export class Plan {
         if (!hasDependenciesDone) invalid = true;
 
         nodes.push(current = {
-          act: Npcs.actOf(npc),
+          act: act,
           npc: npc,
           tasks,
           x,

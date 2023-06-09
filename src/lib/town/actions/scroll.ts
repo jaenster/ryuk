@@ -1,5 +1,9 @@
+import {ShopAction} from "../actions";
+import {NpcFlags} from "../npcs";
+import {Urgency} from "../enums";
+import {ShopTask} from "../task";
 
-/*
+
 new class Scroll extends ShopAction {
   readonly type: string = 'scroll';
   readonly npcFlag: number = NpcFlags.SCROLL;
@@ -15,4 +19,4 @@ new class Scroll extends ShopAction {
   run(task: ShopTask): boolean {
     return false;
   }
-}*/
+}

@@ -22,8 +22,4 @@ export class ShopTask<T=any> {
   run() {
     return this.action.run(this);
   }
-
-  sort(other: ShopTask) {
-    return this.action.sort(other.action);
-  }
 }

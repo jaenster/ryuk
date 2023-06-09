@@ -24,6 +24,9 @@ export enum NpcFlags {
   ACT4 = 1 << 23,
   ACT5 = 1 << 24,
 
+  // Not really a NPC but it is a target in town
+  STASH = 1 << 25,
+
   REPAIR_TRADE = TRADE | REPAIR,
   KEYPOTS = POTS | KEYS,
   ALLSHOP = POTS | KEYS | SCROLL
@@ -74,10 +77,11 @@ export const NpcStats = {
   },
   [Npc.Meshif]: NpcFlags.ACT2 | NpcFlags.ACT3 | NpcFlags.TALK | NpcFlags.TRAVEL,
   [Npc.Warriv]: NpcFlags.ACT1 | NpcFlags.ACT2 | NpcFlags.TALK | NpcFlags.TRAVEL,
+
+  [Npc.Stash]: NpcFlags.STASH | NpcFlags.ACT1 | NpcFlags.ACT2 | NpcFlags.ACT3 | NpcFlags.ACT4 | NpcFlags.ACT5,
 }
 
 export namespace Npcs {
-
   //https://stackoverflow.com/a/37580979/14190818
   function permute<T>(permutation: T[]): T[][] {
     let length = permutation.length,
@@ -104,7 +108,7 @@ export namespace Npcs {
 
   export function getGroups(neededFlags: number) {
     const npcArray = [] as [Npc, NpcFlags][];
-    for(const npc of Object.values(Npc)) {
+    for (const npc of Object.values(Npc)) {
       npcArray.push([npc, NpcStats[npc]]);
     }
 
@@ -113,66 +117,46 @@ export namespace Npcs {
     const groups = [] as Npc[][];
     do {
       const check = npcArray.slice(index).concat(npcArray.slice(0, index));
-        let groupFlags = 0;
-        const group = [] as Npc[];
+      let groupFlags = 0;
+      const group = [] as Npc[];
 
-        for (let i = 0; i < check.length; i++) {
-          const [npc, npcFlags] = check[i]
+      for (let i = 0; i < check.length; i++) {
+        const [npc, npcFlags] = check[i]
 
-          // This npc has one of the flags we need
-          if ((npcFlags & neededFlags) > 0) {
-            group.push(npc);
-            groupFlags |= npcFlags;
+        // This npc has one of the flags we need
+        if ((npcFlags & neededFlags) > 0) {
+          group.push(npc);
+          groupFlags |= npcFlags;
 
-            check.splice(i, 1); // remove this option now
-            i--;
+          check.splice(i, 1); // remove this option now
+          i--;
 
-            // All flags are found in current group. Stop finding more npc's
-            if ((groupFlags & neededFlags) === neededFlags) {
-              const possibilities = permute(group)
-              groups.push(...possibilities);
-              break; // Stop the loop
-            }
-          } else if (i === index) {
-            // This is the first npc it's checking, and it has no needed flags. Skip this entire loop
-            break;
+          // All flags are found in current group. Stop finding more npc's
+          if ((groupFlags & neededFlags) === neededFlags) {
+            const possibilities = permute(group)
+            groups.push(...possibilities);
+            break; // Stop the loop
           }
+        } else if (i === index) {
+          // This is the first npc it's checking, and it has no needed flags. Skip this entire loop
+          break;
         }
+      }
       index += 1;
     } while (index < npcArray.length)
 
     return groups;
   }
 
-  export function getFor(wanted: NpcFlags) {
-    const npcs: Npc[] = [];
-    for (const npc of Object.values(Npc) as Npc[]) {
-      const nFlags = NpcStats[npc] | 0;
+  export function actsOf(npc: Npc): (1|2|3|4|5)[] {
+    const acts = [];
 
-      // Any of the flags are fine. Say wants to be able to sell something,
-      // a trade or gamble is both valid
-      if ((nFlags & wanted) > 0) {
-        npcs.push(npc);
-      }
-    }
+    if ((NpcStats[npc] & NpcFlags.ACT1) === NpcFlags.ACT1) acts.push(1)
+    if ((NpcStats[npc] & NpcFlags.ACT2) === NpcFlags.ACT2) acts.push(2)
+    if ((NpcStats[npc] & NpcFlags.ACT3) === NpcFlags.ACT3) acts.push(3)
+    if ((NpcStats[npc] & NpcFlags.ACT4) === NpcFlags.ACT4) acts.push(4)
+    if ((NpcStats[npc] & NpcFlags.ACT5) === NpcFlags.ACT5) acts.push(5)
 
-    return npcs;
-  }
-
-  export function actOf(npc: Npc): 1 | 2 | 3 | 4 | 5 {
-    const v = (NpcStats?.[npc] | 0);
-    switch (true) {
-      case (v & NpcFlags.ACT1) === NpcFlags.ACT1:
-        return 1;
-      case (v & NpcFlags.ACT2) === NpcFlags.ACT2:
-        return 2;
-      case (v & NpcFlags.ACT3) === NpcFlags.ACT3:
-        return 3;
-      case (v & NpcFlags.ACT4) === NpcFlags.ACT4:
-        return 4;
-      case (v & NpcFlags.ACT5) === NpcFlags.ACT5:
-        return 5;
-    }
-    return me.act;
+    return acts;
   }
 }
