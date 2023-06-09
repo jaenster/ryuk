@@ -52,10 +52,8 @@ export class Plan {
     console.log('Want to '+needed.map(el => el.action.type).join(','));
     const neededFlags = needed.reduce((acc,cur) => acc | cur.action.npcFlag, 0);
     // Get all possible npc combinations
-    let groups = Npcs.getGroups(neededFlags);
-
+    const groups = Npcs.getGroups(neededFlags);
     const routes = [] as Route[];
-
     console.log('Calculating all routes. Having '+groups.length+' options');
 
     for(const group of groups) {
@@ -103,12 +101,7 @@ export class Plan {
           y,
           d: distance,
         });
-
-        tasks.forEach(task => {
-          task.npc.npc = current.npc;
-          task.npc.act = current.act;
-          didTasks.add(task)
-        });
+        tasks.forEach(task => didTasks.add(task));
       }
 
       // These nodes are invalid due to dependencies not following up after each other
@@ -126,14 +119,17 @@ export class Plan {
     // Rewrite to a distance search thing instead of sorting all possibilities
     routes.sort((a,b) => a.totalDistance-b.totalDistance);
 
-    // ToDo remove for debug
-    // for(const route of routes) console.log('Group '+Math.round(route.totalDistance)+ ' -- '+route.nodes.map(el => el.npc).join(', '));
-
     const route = routes[0];
+    this.route = route;
     if (!route) return this;
 
-    // Set route
-    this.route = route;
+    // Fill in npc's of tasks
+    for(const node of route.nodes){
+      for(const task of node.tasks) {
+        task.npc.npc = node.npc;
+        task.npc.act = node.act;
+      }
+    }
 
     // Insert Convenience shops if we visit the shop anyway
     for(const task of urgencies[Urgency.Convenience] ?? []) {
