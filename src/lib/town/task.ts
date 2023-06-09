@@ -6,6 +6,7 @@ export class ShopTask<T=any> {
     public readonly urgency: Urgency,
     public readonly action: ShopAction<T>,
     public readonly storage: Partial<T>,
+    public readonly dependencies: string[],
   ) {
   }
 

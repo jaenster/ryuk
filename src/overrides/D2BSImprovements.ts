@@ -433,6 +433,15 @@ Set.prototype.values = Set.prototype.keys = function <K>(): Iterable<K> {
   }
 };
 
+if (typeof Set.prototype.forEach !== "function") {
+  Set.prototype.forEach = function <K>(predicate: (value: K, key: K, map: Set<K>) => void, thisArg?: any): void {
+    thisArg = thisArg || this;
+    for (const [key, value] of this.values()) {
+      predicate.call(thisArg, value, key, this);
+    }
+  };
+}
+
 Array.prototype.fill = function (value) {
   var O = Object(this);
   var len = parseInt(O.length, 10);

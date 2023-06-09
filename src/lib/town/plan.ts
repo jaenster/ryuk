@@ -62,16 +62,34 @@ export class Plan {
       let current: Node = {act: me.act, x: me.x, y: me.y, npc: undefined as Npc, tasks: [] as ShopTask[], d: 0};
       const nodes = [] as Node[];
 
+      let invalid = false;
+
       const didTasks = new Set<ShopTask>();
       for(const npc of group) {
         const actOfNpc = Npcs.actOf(npc) - 1;
         const distance = acts[actOfNpc].getDistance(current, npc);
         const [x,y] = acts[actOfNpc].getLocationRelative(npc);
-
         // ToDo; stop here if distance is already bigger as current lowest
 
         // Get tasks to be done here
         const tasks = needed.filter(el => (el.action.npcFlag & NpcStats[npc]) === el.action.npcFlag && !didTasks.has(el));
+
+        // Calculate if dependencies of this task are done
+        const hasDependenciesDone = tasks.every((child) => {
+          return child.dependencies.every(dependency => {
+            const parent = needed.find(el => el.action.type === dependency);
+
+            // dependency is also done at this step
+            if (tasks.includes(parent)) return true;
+
+            // Did this needed step before, so it's valid.
+            return didTasks.has(parent);
+          })
+        })
+
+        // Set invalid flag if needed
+        if (!hasDependenciesDone) invalid = true;
+
         nodes.push(current = {
           act: Npcs.actOf(npc),
           npc: npc,
@@ -88,11 +106,17 @@ export class Plan {
         });
       }
 
+      // These nodes are invalid due to dependencies not following up after each other
+      if (invalid) {
+        continue;
+      }
+
       // ToDo make it possible to have another endpoint as waypoint itself
       const wpDistance = acts[current.act-1].getDistance(current, 'waypoint');
       const route = new Route(nodes, wpDistance)
       routes.push(route);
     }
+    console.log('Calculated routes. Having '+routes.length+' routes.'+ (groups.length-routes.length > 0 ? ' '+(groups.length-routes.length)+' routes removed due to dependencies': ''));
 
     // Rewrite to a distance search thing instead of sorting all possibilities
     routes.sort((a,b) => a.totalDistance-b.totalDistance);

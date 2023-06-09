@@ -5,6 +5,8 @@ global['globalThis'] = [].filter.constructor('return this')();
 import "./overrides/Console";
 import {Override} from "./overrides/Override";
 
+// All the hacky stuff to load ryuk properly
+
 //@ts-ignore
 const isDefault = (getScript(true).name.toLowerCase() === 'default.dbj');
 
@@ -34,7 +36,6 @@ if (isDefault) {
 /////////////////////////////
 
 if (isDefault) {
-
   // @ts-expect-error
   const fileList = dopen(directory + '/threads').getFiles();
   if (fileList) fileList.filter(filename => filename.substr(-3) === '.js').forEach(function (filename) {
@@ -50,19 +51,19 @@ if (isDefault) {
 globalThis['LoadConfig'] = function () {
   console.log('Loading config file');
 
-  // @ts-expect-error
-  const fileList = dopen(directory + '/config').getFiles();
-  if (fileList) fileList.filter(filename => filename.substr(-3) === '.js').forEach(function (filename) {
-    const shortFilename = filename.substr(filename, filename.length - 3);
+  {
     // @ts-expect-error
-    const config = require('./config/' + shortFilename);
-    config();
-  });
+    const fileList = dopen(directory + '/config').getFiles();
+    if (fileList) fileList.filter(filename => filename.substr(-3) === '.js').forEach(function (filename) {
+      const shortFilename = filename.substr(filename, filename.length - 3);
+      // @ts-expect-error
+      const config = require('./config/' + shortFilename);
+      config();
+    });
+  }
 
   // Make sure ryuk.js exists in bots folder
   Scripts.Ryuk = true;
-
-  ///ToDo; write attack sequence stuff
 }
 
 ///////////////////////////////////
@@ -72,5 +73,15 @@ globalThis['LoadConfig'] = function () {
 if (isDefault) {
 // @ts-ignore global var
   globalThis['Ryuk'] = require('./Ryuk').default;
+
+  // @ts-expect-error
+  const fileList = dopen(directory + '/lib/town/actions').getFiles();
+  print('----------------------------------------Loading town stuff');
+  if (fileList) fileList.filter(filename => filename.substr(-3) === '.js').forEach(function (filename) {
+    const shortFilename = filename.substr(filename, filename.length - 3);
+    // @ts-expect-error
+    require('./lib/town/actions/' + shortFilename)
+  });
+
 }
 

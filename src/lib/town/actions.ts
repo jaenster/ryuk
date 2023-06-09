@@ -12,14 +12,47 @@ export default class Shopper {
   static create() {
     while (!me.gameReady) delay(3);
 
+    const dependencies = new Set<string>();
+
     const tasks: ShopTask[] = [];
     for (const action of this.actions) {
       const storage = {};
       const urgency = action.check(storage);
       if (urgency > Urgency.Not) {
-        tasks.push(new ShopTask(urgency, action, storage));
+
+        // Figure out dependencies if this task is needed
+        if (urgency === Urgency.Needed) {
+          const depends = action.dependencies(storage);
+          if (depends.length) {
+            console.log(action.type + ' depends on ' + (depends.join(', ')))
+            depends.forEach(el => dependencies.add(el));
+          }
+          tasks.push(new ShopTask(urgency, action, storage, depends));
+        } else {
+          tasks.push(new ShopTask(urgency, action, storage, []));
+        }
       }
     }
+
+    let added;
+    do { // Added dependencies that are not added yet, recursively as those can add them again
+      added = false;
+      dependencies.forEach(dep => {
+        const task = tasks.find(el => el.action.type === dep);
+        if (!task) {
+          const action = this.actions.find(el => el.type === dep);
+          const storage = {};
+          action.check(storage);
+
+          const deps = action.dependencies(storage);
+          if (deps.length) added = true; // Run it again as this has deps too
+          tasks.push(new ShopTask(Urgency.Needed, action, {}, deps));
+        } else {
+          // If a needed task depends on this, this becomes needed too
+          (task as any).urgency = Urgency.Needed;
+        }
+      })
+    } while (added);
 
     return new Plan(tasks);
   }
@@ -33,7 +66,7 @@ export default class Shopper {
   }
 }
 
-export abstract class ShopAction<T=any> {
+export abstract class ShopAction<T = any> {
   public abstract readonly type: string
   public abstract readonly npcFlag: NpcFlags
 
@@ -48,16 +81,20 @@ export abstract class ShopAction<T=any> {
 
   abstract run(task: ShopTask<T>): boolean
 
+  dependencies?(storage?: Partial<T>): string[] {
+    return [];
+  }
+
   sort(other: ShopAction): -1 | 0 | 1 {
     return 0;
   }
 
-  private isAlreadyInteractedWith(npc: Npc){
+  private isAlreadyInteractedWith(npc: Npc) {
     const interactedNPC = getInteractedNPC();
     return interactedNPC && interactedNPC.name.toLocaleLowerCase() === npc.toLocaleLowerCase()
   }
 
-  protected goto(...args: [npc: Npc, act: number]|[{npc: Npc, act: number}]) {
+  protected goto(...args: [npc: Npc, act: number] | [{ npc: Npc, act: number }]) {
     const [npc, act] = args.length === 2 ? args : [args[0].npc, args[0].act];
 
     // Skip goto and if already interacting with the npc
@@ -66,8 +103,8 @@ export abstract class ShopAction<T=any> {
       // Only move to the npc if it's not in target
       const unit = getUnit(1, npc);
       if (!unit) {
-        console.log('Going to '+npc+'@act#'+act);
-        acts[act-1].goTo(npc);
+        console.log('Going to ' + npc + '@act#' + act);
+        acts[act - 1].goTo(npc);
       }
     }
 
@@ -97,7 +134,7 @@ export abstract class ShopAction<T=any> {
     const interactedWith = getInteractedNPC();
     if (unit && interactedWith && interactedWith.classid === unit.classid) {
       const menuId = this.getMenuId();
-      console.log('menuid -- '+menuId);
+      console.log('menuid -- ' + menuId);
       Misc.useMenu(menuId);
 
       if (Misc.poll(() => getUIFlag(sdk.uiflags.Shop) && interactedWith.itemcount > 0, 1000, 25)) {

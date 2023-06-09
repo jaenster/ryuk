@@ -27,7 +27,7 @@ type PotStorage = {
   beltSize: number,
 }
 
-new class Pot extends ShopAction<PotStorage> {
+export const pot = new class Pot extends ShopAction<PotStorage> {
   readonly type: string = 'pot';
   readonly npcFlag: number = NpcFlags.POTS;
 

@@ -35,6 +35,10 @@ declare global {
     ): Map<K, T[]>
   }
 
+  interface ReadonlyArray<T> {
+    find(predicate: (value: T, index: number, obj: Int8Array) => boolean, thisArg?: any): T | undefined;
+  }
+
   interface String {
     diffCount(a: string): number
 
@@ -87,11 +91,11 @@ declare global {
 
     buyPotions(): void,
 
-    shiftCheck(col, beltSize): void,
+    shiftCheck(col, beltSize): boolean,
 
     checkColumns(beltSize): number[],
 
-    getPotion(npc, type): void,
+    getPotion(npc, type):ItemUnit,
 
     fillTome(code): void,
 
@@ -135,7 +139,7 @@ declare global {
 
     needRepair(): void,
 
-    getItemsForRepair(repairPercent, chargedItems): void,
+    getItemsForRepair(repairPercent, chargedItems): ItemUnit[],
 
     reviveMerc(): void,
 
@@ -908,7 +912,7 @@ declare global {
     getResist(unit: Unit, type): void
     checkResist(unit: Unit, type: "physical" | "fire" | "lightning" | "magic" | "cold" | "poison" | "none", maxres?): boolean
     canAttack(unit: Unit): void
-    usingBow(): void
+    usingBow(): 'bow' | 'crossbow'
     getIntoPosition(unit: Unit, distance, coll, walk?): boolean
   }
 
