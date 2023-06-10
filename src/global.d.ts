@@ -1165,6 +1165,7 @@ declare global {
     readonly isRuneword: boolean;
     readonly ethereal: boolean;
     readonly isQuestItem: boolean;
+    readonly sellable: boolean
 
     getColor(): number;
 
@@ -1311,6 +1312,7 @@ declare global {
   }
 
   interface MeType extends Unit {
+    realm: string;
     fps: string;
     windowtitle: string;
     playertype: 0 | 1;
@@ -1612,10 +1614,10 @@ declare global {
 
   function beep(id?: number)
 
-  function clickItem(where: 0 | 1 | 2, bodyLocation: number)
-  function clickItem(where: 0 | 1 | 2, item: ItemUnit)
-  function clickItem(where: 0 | 1 | 2, x: number, y: number)
-  function clickItem(where: 0 | 1 | 2, x: number, y: number, location: number)
+  function clickItem(where: number, bodyLocation: number)
+  function clickItem(where: number, item: ItemUnit)
+  function clickItem(where: number, x: number, y: number)
+  function clickItem(where: number, x: number, y: number, location: number)
   function clickItem(where: number, x: number, y: number, location: number)
 
   function getDistance(a: Unit, b: Unit): number

@@ -2,6 +2,7 @@ import {ShopAction} from "../actions";
 import {NpcFlags} from "../npcs";
 import {Urgency} from "../enums";
 import {ShopTask} from "../task";
+import sdk from "../../../sdk";
 
 
 new class Repair extends ShopAction {
@@ -9,6 +10,11 @@ new class Repair extends ShopAction {
   readonly npcFlag: number = NpcFlags.REPAIR;
 
   check(): Urgency {
+    // Weird bug, if interacting with npc but not in shop, getRepairCost crashes d2
+    if (getInteractedNPC() && !getUIFlag(sdk.uiflags.Shop)) {
+      me.cancel();
+    }
+
     let canAfford = me.gold >= me.getRepairCost();
 
     if (!canAfford) {

@@ -85,7 +85,6 @@ export const clear = new class ClearInventory extends ShopAction<Storage> {
         } else {
           toDropAfterShop.push(item);
         }
-
       } else {
         item.drop();
       }

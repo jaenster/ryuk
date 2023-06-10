@@ -96,6 +96,10 @@ Town.doChoresGoldNeeded = function (this: TownInstance) {
     }
 
 
+    // Weird bug, if interacting with npc but not in shop, getRepairCost crashes d2
+    if (getInteractedNPC() && !getUIFlag(sdk.uiflags.Shop)) {
+        me.cancel();
+    }
     // you are low in gold if you can't repair
     var repairCost = me.getRepairCost();
     total += repairCost;

@@ -40,29 +40,27 @@ new class Resurrect extends ShopAction {
 
     for (let i = 0; i < 3; i += 1) {
       let dialog = getDialogLines();
-      if (dialog) {
+      if (!dialog) continue
 
-        for (let lines = 0; lines < dialog.length; lines += 1) {
-          if (dialog[lines].text.match(/:/gi)) {
-            dialog[lines].handler();
+      for (let lines = 0; lines < dialog.length; lines += 1) {
+        if (dialog[lines].text.match(/:/gi)) {
+          dialog[lines].handler();
 
-            // Wait foir dialog lines to be gone, or have no text with : in it
-            Misc.poll(() => getDialogLines() === false || !(getDialogLines() as {
-              text: string
-            }[])?.some?.(el => el.text.match(/:/gi)), Math.max(750, me.ping * 3), 10)
-            break;
-          }
+          // Wait for dialog lines to be gone, or have no text with : in it
+          Misc.poll(() => getDialogLines() === false || !(getDialogLines() as {
+            text: string
+          }[])?.some?.(el => el.text.match(/:/gi)), Math.max(750, me.ping * 3), 10)
+          break;
+        }
 
-          // "You do not have enough gold for that."
-          if (dialog[lines].text.toLocaleLowerCase().match(getLocaleString(sdk.locale.dialog.youDoNotHaveEnoughGoldForThat).toLocaleLowerCase())) {
-            return false;
-          }
+        // "You do not have enough gold for that."
+        if (dialog[lines].text.toLocaleLowerCase().match(getLocaleString(sdk.locale.dialog.youDoNotHaveEnoughGoldForThat).toLocaleLowerCase())) {
+          return false;
         }
       }
-
-      const gotMerc = Misc.poll(() => me.getMerc(), Math.max(750, me.ping * 3), 10);
-      if (gotMerc) break;
     }
+    const gotMerc = Misc.poll(() => me.getMerc(), Math.max(750, me.ping * 3), 10);
+    return !!gotMerc;
   }
 
   override dependencies(): string[] {
