@@ -3,8 +3,8 @@ import {Urgency} from "../enums";
 import {ShopTask} from "../task";
 import {PickitResult} from "../../../enums";
 import {ShopAction} from "../actions";
+import {sortInventory} from "../../utilities";
 import {identify} from "./identifiy";
-import sdk from "../../../sdk";
 
 type Storage = {
   hasUnids: boolean
@@ -15,10 +15,6 @@ export interface ClearHook {
   handleItems(item: ItemUnit[], pickit: PickitResult): void
 }
 
-const ignoreTypes = [
-  sdk.itemtype.book, sdk.itemtype.key, sdk.itemtype.healingpotion, sdk.itemtype.manapotion,
-  sdk.itemtype.rejuvpotion, sdk.itemtype.scroll,
-];
 export const clear = new class ClearInventory extends ShopAction<Storage> {
   private readonly hooks = new Map<PickitResult, ClearHook[]>();
 
@@ -30,7 +26,7 @@ export const clear = new class ClearInventory extends ShopAction<Storage> {
       .filter(i => i.isInInventory && !i.identified)
       .filter(i => Pickit.checkItem(i).result === PickitResult.TO_IDENTIFY)
 
-    const {gold, drop, custom} = this.getGroups();
+    const {gold, drop, custom, identify} = this.getGroups();
 
     storage.hasUnids = unids.length > 0;
 
@@ -42,7 +38,7 @@ export const clear = new class ClearInventory extends ShopAction<Storage> {
     }, false)
 
     // ToDo; make it a convenience if certain free space is still available
-    if (gold.length + drop.length > 0 || needsCustom) {
+    if (gold.length + drop.length + identify.length > 0 || needsCustom) {
       return Urgency.Needed;
     }
   }
@@ -59,27 +55,46 @@ export const clear = new class ClearInventory extends ShopAction<Storage> {
       return false;
     }
 
-    const {drop, gold, identify, custom} = this.getGroups();
+    let group = this.getGroups();
 
-    // Custom handlers for pickit lines
+    const custom = group.custom;
+    if (custom.length > 0) {
+      // Custom handlers for pickit lines
+      const hooks = custom.groupBy(item => {
+        const nip = Pickit.checkItem(item);
+        return nip.result as 'AE' | 'AEM';
+      });
 
-    const hooks = custom.groupBy(item => {
-      const nip = Pickit.checkItem(item);
-      return nip.result as 'AE' | 'AEM';
-    });
+      for (const [key, items] of Object.entries(hooks)) {
+        this.hooks.get(key)?.forEach(hook => hook.handleItems(items, key));
+      }
 
-    for (const [key, items] of Object.entries(hooks)) {
-      this.hooks.get(key)?.forEach(hook => hook.handleItems(items, key));
+      // Re-run it to, as hooks can change the items
+      group = this.getGroups();
     }
 
-    let inShop = unit && unit.itemcount;
+    const {drop, gold, identify} = group;
+
+    const inShop = unit && unit.itemcount;
+    const toDropAfterShop: ItemUnit[] = [];
     for (const item of drop.concat(gold)) {
       console.log('Getting rid of item' + item.name, inShop);
       if (inShop) {
-        item.sell();
+        if (item.sellable) {
+          item.sell();
+        } else {
+          toDropAfterShop.push(item);
+        }
+
       } else {
         item.drop();
       }
+    }
+
+    if (inShop && toDropAfterShop.length) {
+      // Not sure if you can drop from shop
+      me.cancel();
+      toDropAfterShop.forEach(el => el.drop());
     }
 
     if (identify.length) {
@@ -87,13 +102,14 @@ export const clear = new class ClearInventory extends ShopAction<Storage> {
       return false;
     }
 
+    // With what is left, sort the inventory
+    sortInventory();
     return true;
   }
 
   override dependencies(storage?: Partial<Storage>): string[] {
     const deps = [];
     if (storage.hasUnids) deps.push(identify.type);
-
     return deps;
   }
 
@@ -106,40 +122,4 @@ export const clear = new class ClearInventory extends ShopAction<Storage> {
 
   readonly type: string = 'clear-inventory';
   readonly npcFlag: number = NpcFlags.TRADE;
-
-  getItems() {
-    return (Storage.Inventory.Compare(Config.Inventory) || [])
-      .filter(item => !ignoreTypes.includes(item.itemType))
-  }
-
-  getGroups() {
-    const items = this.getItems();
-    const groups = items.groupBy(item => {
-      const nip = Pickit.checkItem(item);
-      switch (nip.result) {
-        case PickitResult.TO_IDENTIFY:
-          return 'identify'
-        case PickitResult.NONE:
-          return 'drop';
-        case PickitResult.GOLD:
-          return 'gold';
-        case PickitResult.PICKIT:
-          return 'stash';
-        case PickitResult.CRAFTING:
-        case PickitResult.RUNEWORDS:
-        case PickitResult.REPAIR:
-        default:
-          return 'custom';
-      }
-    })
-    const {
-      gold = [],
-      drop = [],
-      identify = [],
-      stash = [],
-      custom = [],
-    } = groups ?? {};
-    return {gold, drop, identify, stash, custom};
-  }
-
 }

@@ -11,17 +11,11 @@ export const identify = new class Identify<T = object> extends ShopAction<T> {
   readonly type: string = 'identify';
   readonly npcFlag: number = NpcFlags.SCROLL;
 
-  protected getItems() {
-    return Storage.Inventory.Compare(Config.Inventory) || [];
-  }
-
   check(): Urgency {
-    const inventory: ItemUnit[] = (Storage.Inventory.Compare(Config.Inventory) || [])
-      .filter(i => i.isInInventory && !i.identified)
-      .filter(i => Pickit.checkItem(i)?.result === PickitResult.TO_IDENTIFY)
+    const {identify} = this.getGroups();
 
     // ToDo; check if x% of space is taken to consider if its needed or convenience
-    return inventory.length === 0 ? Urgency.Not : Urgency.Needed;
+    return identify.length === 0 ? Urgency.Not : Urgency.Needed;
   }
 
   needTown(task: ShopTask): boolean {
@@ -43,7 +37,8 @@ export const identify = new class Identify<T = object> extends ShopAction<T> {
     }
 
 
-    for (const item of this.getItems()) {
+    const {identify} = this.getGroups();
+    for (const item of identify) {
       this.perItem(item);
     }
 

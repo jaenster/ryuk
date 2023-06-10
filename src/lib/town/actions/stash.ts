@@ -17,7 +17,7 @@ export const stash = new class Stash extends ShopAction<Storage> {
   readonly npcFlag: NpcFlags = NpcFlags.STASH;
 
   check(storage: Storage): Urgency {
-    const {stash, identify, drop, gold} = clear.getGroups();
+    const {stash, identify, drop, gold} = this.getGroups();
 
     if (stash.length > 0) {
       storage.afterIdentify = identify.length > 0
@@ -37,7 +37,7 @@ export const stash = new class Stash extends ShopAction<Storage> {
   }
 
   run(task: ShopTask<Storage>): boolean {
-    const {stash} = clear.getGroups();
+    const {stash} = this.getGroups();
     if (stash.length === 0 && me.getStat(sdk.stats.Gold) < Config.StashGold) return false;
 
     acts[task.npc.act-1].goTo('stash');

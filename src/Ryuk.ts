@@ -16,6 +16,9 @@ export default function () {
   console.log('Starting Ryuk');
 
   me.automap = true;
+  if (me.inTown) {
+    Town.getCorpse();
+  }
 
   Cubing.cursorCheck();
 

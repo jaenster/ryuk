@@ -5,6 +5,12 @@ import {NpcFlags} from "./npcs";
 import {talkTo} from "../../scripts/util";
 import {acts} from "./act";
 import sdk from "../../sdk";
+import {PickitResult} from "../../enums";
+
+const ignoreTypes = [
+  sdk.itemtype.book, sdk.itemtype.key, sdk.itemtype.healingpotion, sdk.itemtype.manapotion,
+  sdk.itemtype.rejuvpotion, sdk.itemtype.scroll,
+];
 
 export default class Shopper {
   private static actions: ShopAction[] = [];
@@ -162,6 +168,41 @@ export abstract class ShopAction<T = any> {
         return sdk.menu.Trade
     }
     return sdk.menu.Trade;
+  }
+
+  getGroups() {
+    const items = this.getItems();
+    const groups = items.groupBy(item => {
+      const nip = Pickit.checkItem(item);
+      switch (nip.result) {
+        case PickitResult.TO_IDENTIFY:
+          return 'identify'
+        case PickitResult.NONE:
+          return 'drop';
+        case PickitResult.GOLD:
+          return 'gold';
+        case PickitResult.PICKIT:
+          return 'stash';
+        case PickitResult.CRAFTING:
+        case PickitResult.RUNEWORDS:
+        case PickitResult.REPAIR:
+        default:
+          return 'custom';
+      }
+    })
+    const {
+      gold = [],
+      drop = [],
+      identify = [],
+      stash = [],
+      custom = [],
+    } = groups ?? {};
+    return {gold, drop, identify, stash, custom};
+  }
+
+  getItems() {
+    return (Storage.Inventory.Compare(Config.Inventory) || [])
+      .filter(item => !ignoreTypes.includes(item.itemType))
   }
 }
 
