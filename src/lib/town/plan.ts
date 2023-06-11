@@ -2,8 +2,10 @@ import {Npcs, NpcStats} from "./npcs";
 import {ShopTask} from "./task";
 import {acts} from "./act";
 import {Npc, Urgency} from "./enums";
+import sdk from "../../sdk";
+import {getMaxAct} from "../../scripts/util";
 
-type Node = {act: number, x: number, y: number, npc: Npc, tasks: ShopTask[], d: number};
+type Node = { act: number, x: number, y: number, npc: Npc, tasks: ShopTask[], d: number };
 
 type Writeable<T> = {
   -readonly [P in keyof T]: T[P];
@@ -17,7 +19,7 @@ class Route {
     public readonly nodes: ReadonlyArray<Node>,
     extraDistance: number = 0,
   ) {
-    this.totalDistance = (extraDistance|0) + nodes.reduce((acc,cur) => acc+cur.d, 0);
+    this.totalDistance = (extraDistance | 0) + nodes.reduce((acc, cur) => acc + cur.d, 0);
   }
 
 }
@@ -47,29 +49,37 @@ export class Plan {
       return this;
     }
 
-    console.log('Want to '+needed.map(el => el.action.type).join(','));
-    const neededFlags = needed.reduce((acc,cur) => acc | cur.action.npcFlag, 0);
+    console.log('Want to ' + needed.map(el => el.action.type).join(','));
+    const neededFlags = needed.reduce((acc, cur) => acc | cur.action.npcFlag, 0);
     // Get all possible npc combinations
     let groups = Npcs.getGroups(neededFlags);
 
+    const maxActAccess = getMaxAct();
+
     const routes = [] as Route[];
-    console.log('Calculating all routes. Having '+groups.length+' options');
-    for(const group of groups) {
+    console.log('Calculating all routes. Having ' + groups.length + ' options');
+    for (const group of groups) {
       let current: Node = {act: me.act, x: me.x, y: me.y, npc: undefined as Npc, tasks: [] as ShopTask[], d: 0};
       const nodes = [] as Node[];
 
       let invalid = false;
 
       const didTasks = new Set<ShopTask>();
-      for(const npc of group) {
+      for (const npc of group) {
 
-        const npcActs = Npcs.actsOf(npc);
+        // Filter out acts that the player has no access to
+        const npcActs = Npcs.actsOf(npc).filter(el => el <= maxActAccess);
 
         // If this npc is available in multiple acts (e.g. cain/stash), select current act, OR, first
         const act = npcActs.find(el => el === current.act) ?? npcActs.first();
+        // This npc is unreachable
+        if (!act) {
+          invalid = true;
+          break;
+        }
 
-        const distance = acts[act-1].getDistance(current, npc);
-        const [x,y] = acts[act-1].getLocationRelative(npc);
+        const distance = acts[act - 1].getDistance(current, npc);
+        const [x, y] = acts[act - 1].getLocationRelative(npc);
         // ToDo; stop here if distance is already bigger as current lowest
 
         // Get tasks to be done here
@@ -89,7 +99,10 @@ export class Plan {
         })
 
         // Set invalid flag if needed
-        if (!hasDependenciesDone) invalid = true;
+        if (!hasDependenciesDone) {
+          invalid = true;
+          break;
+        }
 
         nodes.push(current = {
           act: act,
@@ -108,34 +121,34 @@ export class Plan {
       }
 
       // ToDo make it possible to have another endpoint as waypoint itself
-      const wpDistance = acts[current.act-1].getDistance(current, 'waypoint');
+      const wpDistance = acts[current.act - 1].getDistance(current, 'waypoint');
       const route = new Route(nodes, wpDistance)
       routes.push(route);
     }
-    console.log('Calculated routes. Having '+routes.length+' routes.'+ (groups.length-routes.length > 0 ? ' '+(groups.length-routes.length)+' routes removed due to dependencies': ''));
+    console.log('Calculated routes. Having ' + routes.length + ' routes.' + (groups.length - routes.length > 0 ? ' ' + (groups.length - routes.length) + ' routes removed due to dependencies' : ''));
 
     // Rewrite to a distance search thing instead of sorting all possibilities
-    routes.sort((a,b) => a.totalDistance-b.totalDistance);
+    routes.sort((a, b) => a.totalDistance - b.totalDistance);
 
     const route = routes[0];
     this.route = route;
     if (!route) return this;
 
     // Fill in npc's of tasks
-    for(const node of route.nodes){
-      for(const task of node.tasks) {
+    for (const node of route.nodes) {
+      for (const task of node.tasks) {
         task.npc.npc = node.npc;
         task.npc.act = node.act;
       }
     }
 
     // Insert Convenience shops if we visit the shop anyway
-    for(const task of urgencies[Urgency.Convenience] ?? []) {
+    for (const task of urgencies[Urgency.Convenience] ?? []) {
       const flags = task.action.npcFlag;
 
       const node = route.nodes.find(el => (NpcStats[el.npc] & flags) === flags)
       if (!node) continue;
-      console.log('  Will '+task.action.type+' since we visit '+node.npc+' anyway');
+      console.log('  Will ' + task.action.type + ' since we visit ' + node.npc + ' anyway');
 
       task.npc.npc = node.npc;
       task.npc.act = node.act;
@@ -143,7 +156,7 @@ export class Plan {
     }
 
     // Print plan
-    console.log('Planned town visit. Plan:\n  '+route.nodes.map(node => node.npc + ' (' + node.tasks.map(el => el.action.type).join(', ') + ')').join('\n  ')+'\n  end goal: '+this.endGoal);
+    console.log('Planned town visit. Plan:\n  ' + route.nodes.map(node => node.npc + ' (' + node.tasks.map(el => el.action.type).join(', ') + ')').join('\n  ') + '\n  end goal: ' + this.endGoal);
 
     return this;
   }
@@ -159,8 +172,8 @@ export class Plan {
     }
 
     for (const node of this.route.nodes) {
-      for(const task of node.tasks) {
-        console.log('Running - ' + task.action.type+' at '+task.npc.npc+' in act'+task.npc.act);
+      for (const task of node.tasks) {
+        console.log('Running - ' + task.action.type + ' at ' + task.npc.npc + ' in act' + task.npc.act);
         if (!task.run()) {
           break;
         }
