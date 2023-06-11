@@ -97,8 +97,8 @@ export const acts = (() => {
       }
     }
 
-    toRelative(x: number, y: number) {
-      if (x > 1000) {
+    toRelative(x: number, y: number, act: number) {
+      if (x > 1000 && act === 1 && act1fireUnit) {
         this.initialize();
         x -= act1fireUnit[0];
         y -= act1fireUnit[1];
@@ -107,7 +107,7 @@ export const acts = (() => {
     }
 
     getDistance(from: UnitData, spot: Spot) {
-      const [fromx, fromy] = this.toRelative(from.x, from.y);
+      const [fromx, fromy] = this.toRelative(from.x, from.y, from.act);
       // Translate to relative paths to actual paths in act 1
 
       const fromAct = acts[from.act-1];

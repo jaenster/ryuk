@@ -27,9 +27,11 @@ export enum NpcFlags {
   // Not really a NPC but it is a target in town
   STASH = 1 << 25,
 
+  NONE = 0,
+
   REPAIR_TRADE = TRADE | REPAIR,
   KEYPOTS = POTS | KEYS,
-  ALLSHOP = POTS | KEYS | SCROLL
+  ALLSHOP = POTS | KEYS | SCROLL,
 }
 
 export const NpcStats = {

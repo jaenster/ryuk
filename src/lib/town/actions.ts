@@ -91,6 +91,10 @@ export abstract class ShopAction<T = any> {
     return [];
   }
 
+  async background() {
+    return undefined;
+  }
+
   private isAlreadyInteractedWith(npc: Npc) {
     const interactedNPC = getInteractedNPC();
     return interactedNPC && interactedNPC.name.toLocaleLowerCase() === npc.toLocaleLowerCase()
@@ -120,6 +124,7 @@ export abstract class ShopAction<T = any> {
   protected interact(npc: Npc) {
 
     if (!this.isAlreadyInteractedWith(npc)) {
+      console.log('Talking to '+npc)
       talkTo(npc, false);
     }
 
@@ -203,6 +208,24 @@ export abstract class ShopAction<T = any> {
   getItems() {
     return (Storage.Inventory.Compare(Config.Inventory) || [])
       .filter(item => !ignoreTypes.includes(item.itemType))
+  }
+
+  openStash(act: number) {
+    if (!getUIFlag(sdk.uiflags.Stash)) {
+      acts[act-1].goTo('stash');
+    }
+    if (getUIFlag(sdk.uiflags.Cube) && !Cubing.closeCube()) return false;
+
+    if (!getUIFlag(sdk.uiflags.Stash)) {
+      const unit = Misc.poll(() => getUnit(2, sdk.units.Stash));
+      if (!Misc.poll(() => {
+        Misc.click(0, 0, unit);
+        return getUIFlag(sdk.uiflags.Stash);
+      })) {
+        return false;
+      }
+    }
+    return getUIFlag(sdk.uiflags.Stash);
   }
 }
 

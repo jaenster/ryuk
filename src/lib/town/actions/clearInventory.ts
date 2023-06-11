@@ -12,7 +12,7 @@ type Storage = {
 }
 
 export interface ClearHook {
-  handleItems(item: ItemUnit[], pickit: PickitResult): void
+  handleItem(item: ItemUnit, pickit: PickitResult): void
 }
 
 export const clear = new class ClearInventory extends ShopAction<Storage> {
@@ -30,15 +30,8 @@ export const clear = new class ClearInventory extends ShopAction<Storage> {
 
     storage.hasUnids = unids.length > 0;
 
-    const needsCustom = custom.reduce((acc, item) => {
-      if (acc) return acc;
-      const nip = Pickit.checkItem(item);
-      const hooks = this.hooks.get(nip.result);
-      return hooks?.length > 0;
-    }, false)
-
     // ToDo; make it a convenience if certain free space is still available
-    if (gold.length + drop.length + identify.length > 0 || needsCustom) {
+    if (gold.length + drop.length + identify.length > 0) {
       return Urgency.Needed;
     }
   }
@@ -59,14 +52,11 @@ export const clear = new class ClearInventory extends ShopAction<Storage> {
 
     const custom = group.custom;
     if (custom.length > 0) {
-      // Custom handlers for pickit lines
-      const hooks = custom.groupBy(item => {
-        const nip = Pickit.checkItem(item);
-        return nip.result as 'AE' | 'AEM';
-      });
 
-      for (const [key, items] of Object.entries(hooks)) {
-        this.hooks.get(key)?.forEach(hook => hook.handleItems(items, key));
+      for(const item of custom) {
+        const nip = Pickit.checkItem(item);
+        const hooks = this.hooks.get(nip.result);
+        if (hooks && hooks.length) hooks.forEach(hook => hook.handleItem(item, nip.result))
       }
 
       // Re-run it to, as hooks can change the items

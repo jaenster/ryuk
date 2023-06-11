@@ -806,9 +806,7 @@ new class AutoEquip implements ClearHook {
     clear.registerHook(PickitResult.RYUK_AEQUIP, this)
   }
 
-  handleItems(items: ItemUnit[]) {
-    for(const item of items) {
-      Item.autoEquip(); // Rewrite this to work better with all items in mind, and not per item
-    }
+  handleItem(item: ItemUnit) {
+    Item.autoEquip(); // Rewrite this to work better with all items in mind, and not per item
   }
 }

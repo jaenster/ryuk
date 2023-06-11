@@ -317,12 +317,6 @@ if (!Object.values) {
   };
 }
 
-if (!Object.entries) {
-  Object.entries = function (source: object) {
-    return Object.keys(source).map(k => [k, source[k]]);
-  };
-}
-
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is#polyfill
 // @ts-ignore
 if (!Object.is) {
@@ -386,7 +380,7 @@ declare global {
   }
 
   interface Map<K, V> {
-    foreach<V, K>(predicate: (value: V, key: K, map: Map<K, V>) => void, thisArg?: any): void,
+    forEach<V, K>(predicate: (value: V, key: K, map: Map<K, V>) => void, thisArg?: any): void,
 
     keys(): K[]
 
