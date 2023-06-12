@@ -1,9 +1,18 @@
 import sdk from "../../sdk";
 import {Override} from "../../overrides/Override";
 import {Build} from "./Build";
-import {BlockBits, getCollisionBetweenCoords, isBlockedBetween} from "../Coords";
+import {Collision, isBlockedBetween} from "../Coords";
 import {BlockingUnit} from '../BlockingGfx';
 import {startBuild} from "../../GlobalConfig";
+import {
+  calculateKillableFallensByFrostNova,
+  calculateNovaDamage,
+  calculateRawFireballDamage,
+  calculateRawStaticDamage
+} from "../utilities";
+import GameData from "../data/GameData";
+
+const staticMap = new WeakMap<Monster, number>();
 
 const build: Build = {
   get usedSkills() {
@@ -32,8 +41,14 @@ const build: Build = {
     energy: [100, 1],
   },
   overrides: [
-    new Override(ClassAttack, 'decideSkill', function (original, monster: Monster) {
+    new Override(ClassAttack, 'decideSkill', function (original, monster: Monster, skipSkill: number[] = []) {
       let generatedSkill = -1;
+
+      // console.log('raw static dmg:', calculateRawStaticDamage(monster));
+      // console.log('raw fireball dmg:', calculateRawFireballDamage(monster));
+      //
+      // const fireBoltDmg = GameData.skillDamage(sdk.skills.FireBolt, monster);
+      // console.log('raw firebolt dmg:', (fireBoltDmg.min + fireBoltDmg.max) / 2);
 
       const data = {
         static: {
@@ -41,6 +56,7 @@ const build: Build = {
           range: Skill.getRange(sdk.skills.StaticField),
           mana: Skill.getManaCost(sdk.skills.StaticField),
           cap: [25, 33, 50][me.diff],
+          dmg: skipSkill.includes(sdk.skills.StaticField) ? 0 : calculateRawStaticDamage(),
         },
         frost: {
           have: me.getSkill(sdk.skills.FrostNova, 1),
@@ -48,61 +64,83 @@ const build: Build = {
           mana: Skill.getManaCost(sdk.skills.FrostNova)
         },
         nova: {
-          have: me.getSkill(sdk.skills.Nova, 1),
-          range: 7,
-          mana: Skill.getManaCost(sdk.skills.Nova)
+          have: me.getSkill(sdk.skills.FireBall, 1),
+          range: Skill.getRange(sdk.skills.FireBall),
+          mana: Skill.getManaCost(sdk.skills.FireBall),
+          dmg: calculateNovaDamage(),
         },
-        lightBolt: {
+        fireBolt: {
+          have: me.getSkill(sdk.skills.FireBolt, 1),
+          range: Skill.getRange(sdk.skills.FireBolt),
+          mana: Skill.getManaCost(sdk.skills.FireBolt),
+          dmg: ((dmg) => {
+            return (dmg.min + dmg.max) / 2;
+          })(GameData.skillDamage(sdk.skills.FireBolt, monster)),
+        },
+        chargedBolt: {
           have: me.getSkill(sdk.skills.ChargedBolt, 1),
           range: Skill.getRange(sdk.skills.ChargedBolt),
-          mana: Skill.getManaCost(sdk.skills.ChargedBolt)
+          mana: Skill.getManaCost(sdk.skills.ChargedBolt),
+          dmg: ((dmg) => {
+            return (dmg.min + dmg.max) / 2;
+          })(GameData.skillDamage(sdk.skills.ChargedBolt, monster)),
         }
       }
 
+      //ToDo calculate if everyone dies with a single nova, its pointless to frost nova
       { // Frozen
         const {frost: sk} = data;
         if (sk.have) {
           if (me.mp > sk.mana) {
-            const monsters = getUnits(1).filter(unit => unit.attackable && unit.distance < sk.range && !unit.getState(sdk.states.Frozen))
+            const monsters = getUnits(1)
+              .filter(unit => unit.attackable
+                && unit.distance < sk.range
+                && unit.getStat(sdk.stats.Coldresist) < 100
+                && !unit.isChilled
+                && unit.x
+                && !checkCollisionBetween(me.x, me.y, unit.x, unit.y, 5, Collision.BLOCK_MISSILE)
+              )
 
             if (monsters.length > 0) {
               Skill.cast(sdk.skills.FrostNova, 0);
               return [generatedSkill, 1]; // Freeze those
             }
+
+            //ToDo calculate if everyone dies with a single nova, its pointless to frost nova
+
+            // if the nova cause the death of any monsters around us, its worth it
+            if (calculateKillableFallensByFrostNova() > 0) {
+              Skill.cast(sdk.skills.FrostNova, 0);
+              return [generatedSkill, 1]; // Frozen those
+            }
           }
         }
       }
 
-      if (!monster || Attack.checkResist(monster, "lightning")) {
-        const {static: sk} = data;
-        if (sk.have && me.mp > sk.mana * 1.5) {
-          const monsters = getUnits(1).filter(unit => {
-            if (!unit.attackable) return false;
-            if (unit.distance > sk.range) return false;
-            return (unit.hp / 128 * 100) > sk.cap;
-          })
+      if (monster) {
+        let count; // Avoid static'ing monsters an entire group of monsters for ever, every 4th static, want something else
+        count = (staticMap.get(monster) | 0) + 1;
+        staticMap.set(monster, count);
 
-          if (monsters.length > 1) {
-            Skill.cast(sdk.skills.StaticField, 0);
-            return [generatedSkill, 1]; // Static that bitch
+        if (count < 4 && monster && Attack.checkResist(monster, "lightning") && data.static.dmg > Math.max(data.nova.dmg, data.chargedBolt.dmg)) {
+          // Actually make the bot walk to up to the monster and static, as this is the best decision
+          if (me.mp > data.static.mana && !isBlockedBetween(me, monster)) {
+            staticMap.set(monster, count + 1);
+            return [sdk.skills.StaticField, 0];
           }
-        }
-      }
-
-      if (!monster || Attack.checkResist(monster, "lightning")) {
-        // Fireball/bolt
-        const {nova} = data;
-        const {lightBolt} = data;
-
-        if (nova.have && me.mp > nova.mana) {
-          generatedSkill = sdk.skills.Nova
-        } else if (lightBolt.have && me.mp > lightBolt.mana) {
-          generatedSkill = sdk.skills.ChargedBolt;
         } else {
-          generatedSkill = 0;
+          // If we don't decide to static, remove the counter
+          staticMap.delete(monster)
         }
-      } else {
-        return [generatedSkill, 2];
+      }
+
+      if (!monster) {
+        const {nova} = data;
+        if (nova.have && me.mp > nova.mana) {
+          generatedSkill = sdk.skills.Nova;
+        } else {
+          generatedSkill = sdk.skills.ChargedBolt;
+        }
       }
 
       return [generatedSkill, 0];
@@ -131,37 +169,6 @@ const build: Build = {
       return result;
 
     }),
-
-    // 4224
-
-
-    // Returns: 0 - fail, 1 - success, 2 - no valid attack skills
-    new Override(ClassAttack, ClassAttack.doCast, (original, unit, skillId) => {
-      // print(getCollision(me.area, me.x, me.y, unit.x, unit.y).toString(2));
-
-      console.debug('>' + (getCollisionBetweenCoords(me.x, me.y, unit.x, unit.y).toString(2)));
-      if (isBlockedBetween(me, unit) || unit.distance > 30) {
-        Attack.getIntoPosition(unit, Skill.getRange(skillId) / 3, 0
-          | BlockBits.LineOfSight
-          | BlockBits.Ranged
-          | BlockBits.Casting
-          | BlockBits.ClosedDoor
-          // | BlockBits.Players // This excludes our own spot
-          | BlockBits.Objects
-        );
-        console.log('Get into position? ', unit, ' -> ' + Skill.getRange(skillId));
-      }
-
-      if (skillId > -1) {
-        if (!unit.dead && !checkCollision(me, unit, 0x4)) {
-          Skill.cast(skillId, Skill.getHand(skillId), unit);
-        }
-
-        return 1;
-      }
-
-      return 2;
-    })
   ],
   valid: function () {
     return me.charlvl < 30 && startBuild === this.name;
