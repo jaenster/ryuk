@@ -1,5 +1,6 @@
 import worker from "../lib/worker";
 import {SkipScript} from "../decisions/Throwables";
+import Shopper from "./town/actions";
 
 const lastChickens: [number, number, number, number][] = [];
 const Config = {
@@ -80,8 +81,8 @@ if (getScript(true).name.toLowerCase() === 'default.dbj') {
 
         if (stopCurrentScript) throw new SkipScript("Too many town chickens on this script, next");
 
-        Town.doChores();
         Town.goToTown(act);
+        Shopper.run();
         Pather.moveTo(x, y)
 
         while (getTickCount() - tick < 4500) delay(10);

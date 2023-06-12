@@ -1,4 +1,4 @@
-import {PickitResult, Qualities, Runes, StorageLocations} from "../enums";
+import {PickitResult, Qualities, Runes} from "../enums";
 import sdk from "../sdk";
 import {mercAutoEquip, personalAutoEquip} from "./AutoEquip";
 import charData from "./CharData";
@@ -485,6 +485,13 @@ export class AutoRunewords {
     if (forUnit === WantType.Merc) return mercAutoEquip;
   }
 
+  static wantToMakeRunewords() {
+    if (this.strategies.length === 0) {
+      this.buildStrategies();
+    }
+    return this.strategies.filter(s => s.isComplete).length;
+  }
+
   static makeRunewords() {
     if (this.strategies.length === 0) {
       this.buildStrategies();
@@ -506,7 +513,7 @@ export class AutoRunewords {
         }
       });
   }
-};
+}
 
 Pickit.on('checkItem', function (item, result) {
   // override result.result to keep or whatever

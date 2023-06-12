@@ -1,6 +1,7 @@
 import sdk from "../../sdk";
 import {calculateSpots} from "../util";
 import {isBlockedBetween} from "../../lib/Coords";
+import Shopper from "../../lib/town/actions";
 
 export = function () {
   var portal, tick;
@@ -147,7 +148,7 @@ export = function () {
   };
 
   if (me.area !== sdk.areas.ThroneOfDestruction) {
-    Town.doChores();
+    Shopper.run()
     Pather.journeyTo(sdk.areas.ThroneOfDestruction);
     //@ts-ignore
     Precast.doPrecast(true);

@@ -50,7 +50,7 @@ Pickit.on('checkItem', (item, rval) => {
     if (!tome) {
       let count = me.findItems(item.classid, 0, StorageLocations.Inventory).length;
       if (item.classid === sdk.items.idScroll) {
-        let itemsToId = me.getItemsEx().filter(i => i.isInInventory && Pickit.checkItem(i).result === PickitResult.TO_IDENTIFY);
+        let itemsToId = me.getItemsEx().filter(i => i.isInInventory && !i.identified);
         count = Math.max(count, itemsToId.length);
       }
       if (count < 2) {

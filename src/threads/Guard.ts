@@ -79,8 +79,8 @@
 
                 this.update = () => {
                     stack = myStack.match(/[^\r\n]+/g);
-                    // stack = stack && stack.slice(6/*skip path to here*/, -6).map(el => {
-                    stack = stack && stack.map(el => {
+                    stack = stack && stack.slice(4/*skip path to here*/, -6).map(el => {
+                    // stack = stack && stack.map(el => {
                         let line = el.substr(el.lastIndexOf(':') + 1),
                           functionName = el.substr(0, el.indexOf('@')),
                           filename = el.substr(el.lastIndexOf('\\') + 1);

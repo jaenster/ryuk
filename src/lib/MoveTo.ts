@@ -142,7 +142,7 @@ export default function moveTo(
 
         // find where to start (usefull to render a long path with nodes to walk back
         const startIndex = path.findIndex(path => path.index === settings.startIndex);
-        if (startIndex > -1) console.log('start idnex');
+        if (startIndex > -1) console.log('start index');
         let loops = 0, shrine;
         for (let i = startIndex > 1 ? startIndex : 0, node, l = path.length; i < l; loops++) {
             if (settings.allowClearing && settings.clearFilter && canTeleport) {
@@ -259,7 +259,6 @@ export default function moveTo(
                 // Only very near items here
                 Pickit.pickItems(3, true);
             }
-            // console.log('after pick');
 
 
             // if shrine found, click on it
@@ -320,7 +319,6 @@ export default function moveTo(
                             for (let j = i; j < newIndex; j++) {
                                 const hookEvent = path[i + j]?.hook;
                                 if (hookEvent) {
-                                    console.log('Skipped nodes, ')
                                     hookEvent();
                                 }
                             }

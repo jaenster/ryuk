@@ -7,6 +7,7 @@ import CharData from '../lib/CharData';
 import ExperienceData from '../lib/data/ExperienceData';
 import {getTownForQuest} from "../lib/utilities";
 import {StorageLocations} from "../enums";
+import Shopper from "../lib/town/actions";
 
 class MagicFind extends Decision {
   public run() {
@@ -57,7 +58,7 @@ function hasChildren<T>(test: T): test is (T & { children: DecisionTree[] }) {
 }
 
 export default function (): Decision {
-  if (me.inTown) Town.doChores();
+  if (me.inTown) Shopper.run();
 
   let broke = false; // ToDo, figure out if we are broke. if not, we can do some stuff before other quests
 

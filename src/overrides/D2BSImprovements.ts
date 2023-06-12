@@ -317,12 +317,6 @@ if (!Object.values) {
   };
 }
 
-if (!Object.entries) {
-  Object.entries = function (source: object) {
-    return Object.keys(source).map(k => [k, source[k]]);
-  };
-}
-
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is#polyfill
 // @ts-ignore
 if (!Object.is) {
@@ -361,7 +355,7 @@ Array.prototype.groupBy ??= function <T, K extends (string | symbol)>(
   return obj;
 }
 
-Array.prototype.groupByToMap ??= function<T, K>(
+Array.prototype.groupByToMap ??= function <T, K>(
   callback: (value: T, index: number, array: Array<T>) => K,
   thisArg?: any
 ): Map<K, Array<T>> {
@@ -377,3 +371,90 @@ Array.prototype.groupByToMap ??= function<T, K>(
   });
   return map;
 }
+
+declare global {
+  interface Set<T> {
+    values(): T[]
+
+    keys(): T[]
+  }
+
+  interface Map<K, V> {
+    forEach<V, K>(predicate: (value: V, key: K, map: Map<K, V>) => void, thisArg?: any): void,
+
+    keys(): K[]
+
+    values(): V[]
+
+    entries(): [K, V][]
+  }
+
+  interface Array<T> {
+    fill(value: number): T[]
+  }
+}
+
+if (typeof Map.prototype.forEach !== "function") {
+  Map.prototype.forEach = function <V, K>(predicate: (value: V, key: K, map: Map<K, V>) => void, thisArg?: any): void {
+    thisArg = thisArg || this;
+    for (const [key, value] of this.entries()) {
+      predicate.call(thisArg, value, key, this);
+    }
+  };
+}
+
+// @ts-ignore
+Map.prototype.keys = function <K, V>(): Iterable<K> {
+  for (const [key] of this.entries()) {
+    // @ts-ignore -- Old spidermonkey supports yield in normal functions, see legacy generators
+    yield key;
+  }
+};
+
+// @ts-ignore
+Map.prototype.values = function <K, V>(): Iterable<V> {
+  for (const [, value] of this.entries()) {
+    // @ts-ignore -- Old spidermonkey supports yield in normal functions, see legacy generators
+    yield value;
+  }
+};
+
+// @ts-ignore
+Set.prototype.values = Set.prototype.keys = function <K>(): Iterable<K> {
+  for (const key of this.entries()) {
+    // @ts-ignore -- Old spidermonkey supports yield in normal functions, see legacy generators
+    yield key;
+  }
+};
+
+if (typeof Set.prototype.forEach !== "function") {
+  Set.prototype.forEach = function <K>(predicate: (value: K, key: K, map: Set<K>) => void, thisArg?: any): void {
+    thisArg = thisArg || this;
+    for (const [key, value] of this.values()) {
+      predicate.call(thisArg, value, key, this);
+    }
+  };
+}
+
+Array.prototype.fill = function (value) {
+  var O = Object(this);
+  var len = parseInt(O.length, 10);
+  var start = arguments[1];
+  var relativeStart = parseInt(start, 10) || 0;
+  var k = relativeStart < 0
+    ? Math.max(len + relativeStart, 0)
+    : Math.min(relativeStart, len);
+  var end = arguments[2];
+  var relativeEnd = end === undefined
+    ? len
+    : (parseInt(end) || 0);
+  var final = relativeEnd < 0
+    ? Math.max(len + relativeEnd, 0)
+    : Math.min(relativeEnd, len);
+
+  for (; k < final; k++) {
+    O[k] = value;
+  }
+
+  return O;
+};

@@ -5,6 +5,7 @@ import {Events} from "../lib/Events";
 import {sortInventory} from "../lib/utilities";
 import {AutoRunewords} from "../lib/AutoRuneword";
 import {getWp, getWpPreset, gotoWp, talkTo} from "../scripts/util";
+import Shopper from "../lib/town/actions";
 
 // Additions
 declare global {
@@ -95,6 +96,10 @@ Town.doChoresGoldNeeded = function (this: TownInstance) {
     }
 
 
+    // Weird bug, if interacting with npc but not in shop, getRepairCost crashes d2
+    if (getInteractedNPC() && !getUIFlag(sdk.uiflags.Shop)) {
+        me.cancel();
+    }
     // you are low in gold if you can't repair
     var repairCost = me.getRepairCost();
     total += repairCost;
@@ -170,12 +175,8 @@ Town.buyStaminaPotions = function (this: TownInstance) {
 };
 
 
-new Override(Town, Town.doChores, (original, ...args) => {
-    original()
-})
 
 new Override(Town, Town.clearScrolls, function () {
-
     me.getItemsEx()
       .filter(i =>
         i.location === sdk.storage.Inventory &&
@@ -210,6 +211,8 @@ new Override(Town, Town.clearScrolls, function () {
 
 
 new Override(Town, Town.doChores, function (original, repair?: boolean) {
+    console.error('Should not use doChores - '+(new Error).stack);
+    return;
     if (!me.inTown) this.goToTown();
     if (me.act === 2 && getDistance(5153, 5203, me.x, me.y) < 30) {
         if (talkTo(NPC.Warriv, false)) {
@@ -1027,3 +1030,37 @@ Object.defineProperty(Town.tasks[1], 'Shop', {
 
 // Add events to town
 Object.keys(Events.prototype).forEach(key => Town[key] = Events.prototype[key]);
+
+new Override(Town, Town.visitTown, function (original, repair){
+    if (me.inTown) {
+        Shopper.run();
+        return true;
+    }
+
+    if (!this.canTpToTown()) return false;
+
+    let preArea = me.area;
+    let preAct = me.act;
+
+    // not an essential function -> handle thrown errors
+    try {
+        this.goToTown();
+    } catch (e) {
+        return false;
+    }
+
+    Shopper.run();
+
+    me.act !== preAct && this.goToTown(preAct);
+    this.move("portalspot");
+
+    if (!Pather.usePortal(null, me.name)) {
+        try {
+            Pather.usePortal(preArea, me.name);
+        } catch (e) {
+            throw new Error("Town.visitTown: Failed to go back from town");
+        }
+    }
+
+    return true;
+})

@@ -35,6 +35,10 @@ declare global {
     ): Map<K, T[]>
   }
 
+  interface ReadonlyArray<T> {
+    find(predicate: (value: T, index: number, obj: Int8Array) => boolean, thisArg?: any): T | undefined;
+  }
+
   interface String {
     diffCount(a: string): number
 
@@ -87,11 +91,11 @@ declare global {
 
     buyPotions(): void,
 
-    shiftCheck(col, beltSize): void,
+    shiftCheck(col, beltSize): boolean,
 
     checkColumns(beltSize): number[],
 
-    getPotion(npc, type): void,
+    getPotion(npc, type):ItemUnit,
 
     fillTome(code): void,
 
@@ -135,7 +139,7 @@ declare global {
 
     needRepair(): void,
 
-    getItemsForRepair(repairPercent, chargedItems): void,
+    getItemsForRepair(repairPercent, chargedItems): ItemUnit[],
 
     reviveMerc(): void,
 
@@ -176,6 +180,8 @@ declare global {
     on<S = this>(key: "initNPC", handler: (this: S, npc?: Monster) => void): this
 
     once<S = this>(key: "initNPC", handler: (this: S, npc?: Monster) => void): this
+
+    canTpToTown(): boolean;
   }
 
   const Town: TownInstance;
@@ -908,7 +914,7 @@ declare global {
     getResist(unit: Unit, type): void
     checkResist(unit: Unit, type: "physical" | "fire" | "lightning" | "magic" | "cold" | "poison" | "none", maxres?): boolean
     canAttack(unit: Unit): void
-    usingBow(): void
+    usingBow(): 'bow' | 'crossbow'
     getIntoPosition(unit: Unit, distance, coll, walk?): boolean
   }
 
@@ -977,7 +983,7 @@ declare global {
     doCubing(): void
     cursorCheck(): void
     openCube(): void
-    closeCube(): void
+    closeCube(): boolean
     emptyCube(): void
     makeRevPots(): void
   }
@@ -1159,6 +1165,7 @@ declare global {
     readonly isRuneword: boolean;
     readonly ethereal: boolean;
     readonly isQuestItem: boolean;
+    readonly sellable: boolean
 
     getColor(): number;
 
@@ -1305,6 +1312,7 @@ declare global {
   }
 
   interface MeType extends Unit {
+    realm: string;
     fps: string;
     windowtitle: string;
     playertype: 0 | 1;
@@ -1497,7 +1505,7 @@ declare global {
 
   function getIsTalkingNPC(): boolean
 
-  function getDialogLines(): { handler() }[] | false
+  function getDialogLines(): ({ handler(), text: string })[] | false
 
   function print(what: string|number): void
 
@@ -1606,10 +1614,10 @@ declare global {
 
   function beep(id?: number)
 
-  function clickItem(where: 0 | 1 | 2, bodyLocation: number)
-  function clickItem(where: 0 | 1 | 2, item: ItemUnit)
-  function clickItem(where: 0 | 1 | 2, x: number, y: number)
-  function clickItem(where: 0 | 1 | 2, x: number, y: number, location: number)
+  function clickItem(where: number, bodyLocation: number)
+  function clickItem(where: number, item: ItemUnit)
+  function clickItem(where: number, x: number, y: number)
+  function clickItem(where: number, x: number, y: number, location: number)
   function clickItem(where: number, x: number, y: number, location: number)
 
   function getDistance(a: Unit, b: Unit): number

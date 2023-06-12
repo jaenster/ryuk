@@ -1,8 +1,10 @@
-//@ts-expect-error
-require('./lib/AutoEquip');
+import './lib/AutoEquip'
+import './lib/eventEmitter'
+import './lib/AutoBuild'
+import './lib/PickitHooks'
+import './lib/Quests'
+import './lib/AutoRuneword'
 
-// @ts-ignore
-['eventEmitter', 'AutoBuild', 'PickitHooks', 'Quests', 'AutoRuneword'].forEach(key => require("./lib/" + key));
 import {respec} from "./lib/AutoBuild"
 
 import decisions from "./decisions/index";
@@ -14,6 +16,9 @@ export default function () {
   console.log('Starting Ryuk');
 
   me.automap = true;
+  if (me.inTown) {
+    Town.getCorpse();
+  }
 
   Cubing.cursorCheck();
 
@@ -24,28 +29,32 @@ export default function () {
   ['TownChicken'].forEach(key => require("./lib/" + key));
 
   let decision: Decision;
-  do {
+  try {
+    do {
 
-    respec();
+      respec();
 
-    decision = decisions();
-    if (decision) {
+      decision = decisions();
+      if (decision) {
 
+        gameData.scripts.push({
+          startTime: new Date,
+          name: decision.type,
+        })
 
-      console.log('here', decision.type);
-      gameData.scripts.push({
-        startTime: new Date,
-        name: decision.type,
-      })
-
-      try {
-        decision.run();
-      } catch (e) {
-        console.log(e.stack);
-        Misc.errorReport(e);
-      } finally {
-        decision.markAsDone();
+        try {
+          decision.run();
+        } catch (e) {
+          console.log(e.stack);
+          Misc.errorReport(e);
+        } finally {
+          decision.markAsDone();
+        }
       }
-    }
-  } while (decision);
+    } while (decision);
+  } catch (e) {
+    console.error(e.stack);
+    console.log(e.message);
+    throw e;
+  }
 }

@@ -1,8 +1,9 @@
 import sdk from "../../sdk";
+import Shopper from "../../lib/town/actions";
 
 export = function () {
   Town.goToTown();
-  Town.doChores();
+  Shopper.run()
 
   Pather.journeyTo(sdk.areas.DenOfEvil);
   Attack.clearLevel();

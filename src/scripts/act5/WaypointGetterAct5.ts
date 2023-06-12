@@ -1,5 +1,6 @@
 import sdk from "../../sdk";
 import {haveWp} from "../util";
+import Shopper from "../../lib/town/actions";
 
 export = function () {
   [
@@ -13,7 +14,7 @@ export = function () {
     if (!haveWp(area)) {
       Pather.getWP(area);
       Pather.useWaypoint(sdk.areas.PandemoniumFortress);
-      Town.doChores();
+      Shopper.run()
     }
   });
 

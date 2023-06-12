@@ -9,6 +9,7 @@ import sdk from "../sdk";
 import {talkTo} from "../scripts/util";
 import {assignSkillToHotkey} from "./utilities";
 import charData from "./CharData";
+import Shopper from "./town/actions";
 
 const builds: Build[] = [
   Firen,
@@ -41,7 +42,7 @@ export function respec() {
   if (!me.getQuest(sdk.quests.DenOfEvil, 0)) {
     if (me.area !== sdk.areas.DenOfEvil) {
       Town.goToTown();
-      Town.doChores();
+      Shopper.run()
 
       Pather.journeyTo(sdk.areas.DenOfEvil);
     }
@@ -178,7 +179,6 @@ me.on('canStat', function statHandler(availablePoints) {
     console.warn('No active build')
     return;
   }
-  console.log('Statting?');
 
   // credits to dzik for a big part of original code
   const checkStat = (stat, items) => {
