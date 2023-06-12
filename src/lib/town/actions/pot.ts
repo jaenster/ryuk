@@ -24,17 +24,27 @@ type PotStorage = {
   bufferNeedMP: number
 
 
+  totalNeeded: number
+  totalHave: number
+
   beltSize: number,
 }
 
 export const pot = new class Pot extends ShopAction<PotStorage> {
   readonly type: string = 'pot';
-  readonly npcFlag: number = NpcFlags.POTS;
+  // readonly npcFlag: number = NpcFlags.POTS;
 
-  check(storage: PotStorage): Urgency {
-    if (me.gold < 1000) {
-      return Urgency.Not;
-    }
+  get npcFlag() {
+    // On nightmare/hell we just need any npc that sells pots
+    if (me.diff) return NpcFlags.POTS;
+
+    // Add specific act of npc to buy pots. Since it starts at act 1, dont shift by one less
+    const specificAct = NpcFlags.ACT1 << (me.highestAct-1);
+    console.log('Npc flag for pots --> ', specificAct | NpcFlags.POTS)
+    return specificAct | NpcFlags.POTS
+  }
+
+  calculateNeededPots(storage: Partial<PotStorage> = {}): PotStorage {
     storage.beltSize = Storage.BeltSize();
 
     // stats for hp belt
@@ -59,8 +69,38 @@ export const pot = new class Pot extends ShopAction<PotStorage> {
 
 
     // If more as half of the pots are missing, make a trip to npc
-    const totalNeeded = storage.bufferNeedHP+storage.bufferNeedMP + storage.beltNeedMP + storage.beltNeedHP;
-    const totalHave = storage.beltHaveHP +storage.beltHaveMP + storage.bufferHaveHP + storage.bufferHaveMP;
+    storage.totalNeeded = storage.bufferNeedHP+storage.bufferNeedMP + storage.beltNeedMP + storage.beltNeedHP;
+    storage.totalHave = storage.beltHaveHP +storage.beltHaveMP + storage.bufferHaveHP + storage.bufferHaveMP;
+
+    return storage as PotStorage;
+  }
+
+  price(storage: PotStorage = this.calculateNeededPots()) {
+    const cost = {
+      hp: [30, 75, 112, 225, 500],
+      mp: [60, 150, 270, 450, 1000],
+    };
+
+    // Price of act 5 is the same as all of nm/hell
+    const priceIndex = me.diff == 0 ? me.highestAct : 5;
+
+    const costOf = {
+      hp: cost.hp[priceIndex],
+      mp: cost.mp[priceIndex],
+    }
+
+    return (storage.beltNeedHP + storage.bufferNeedMP) * costOf.hp + (storage.beltNeedMP + storage.bufferNeedMP) * costOf.mp;
+  }
+
+  check(storage: PotStorage): Urgency {
+    // Calculate pot need
+    this.calculateNeededPots(storage);
+    const price = this.price(storage);
+
+    // Can not afford
+    if (me.gold <= price) {
+      return Urgency.Not;
+    }
 
     // Ran out of a specific pot?
     if (
@@ -70,13 +110,13 @@ export const pot = new class Pot extends ShopAction<PotStorage> {
       return Urgency.Needed;
     }
 
-    // If have less as 66% of the needed pots, it needed pots
-    if ((100 / totalNeeded * totalHave) < 66) {
+    // If it has less than 66% of the needed pots, it needed pots
+    if ((100 / storage.totalNeeded * storage.totalHave) < 66) {
       return Urgency.Needed;
     }
 
     // if any pot is needed, buy them if given a chance
-    if (totalNeeded > 0) {
+    if (storage.totalNeeded > 0) {
       return Urgency.Convenience;
     }
 
