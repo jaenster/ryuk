@@ -54,7 +54,7 @@ export class Plan {
     // Get all possible npc combinations
     let groups = Npcs.getGroups(neededFlags);
 
-    const maxActAccess = getMaxAct();
+    const maxActAccess = me.highestAct;
 
     const routes = [] as Route[];
     console.log('Calculating all routes. Having ' + groups.length + ' options');
