@@ -35,7 +35,9 @@ export = function () {
         sdk.areas.TowerCellarLvl4,
         sdk.areas.TowerCellarLvl5]
         .forEach(to => {
-          Attack.clear(10); // clear at entry, sometimes there are monsters that struck you while calculating path
+          if (getUnits(1).filter(el => el.attackable && getDistance(me, el) < 7).length > 0) {
+            Skill.cast(sdk.skills.FrostNova);
+          }
           let seenChampionPack = false;
           const exit = getExit(me.area, to);
           const path = getPath(me.area, me.x, me.y, exit.x, exit.y, 2, 5) || undefined;
