@@ -172,6 +172,32 @@ export function mixinFunctions(target: { prototype: object }, ...sources: { prot
   );
 }
 
+export function calculateNovaDamage() {
+  if (!me.getSkill(sdk.skills.Nova, 1)) return 0;
+
+  const range = Skill.getRange(sdk.skills.Nova);
+  return getUnits(1)
+    .filter(mon => mon.attackable && getDistance(mon, me) < range)
+    .reduce((acc, unit) => {
+      const {classid: classId, area: areaId} = unit;
+      const maxHealth = GameData.monsterAvgHP(classId, areaId, unit.charlvl - GameData.monsterLevel(classId, areaId))
+      const currentHealth = maxHealth / 100 * (unit.hp * 100 / unit.hpmax)
+
+      const monsterRes = unit.getStat(sdk.stats.Lightresist) as number;
+      const pierce = me.getStat(sdk.stats.PierceLtng) as number;
+      const totalRes = Math.min(100, Math.max(-100, monsterRes - pierce));
+
+      const {max, min} = GameData.baseSkillDamage(sdk.skills.Nova);
+      const avgDmg = (max+min) / 2;
+
+      const potentialDamage = avgDmg / (100 / (100 - totalRes));
+
+      // It cant do more dmg as health it got
+      const realDmg = Math.min(currentHealth, potentialDamage);
+      return acc + realDmg;
+    }, 0)
+}
+
 export function calculateRawStaticDamage(distanceUnit: { x: number, y: number } = me) {
   if (!me.getSkill(sdk.skills.StaticField, 1)) return 0;
   const range = Skill.getRange(sdk.skills.StaticField),
