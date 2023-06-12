@@ -163,7 +163,11 @@ const exporting: {
       // Fuck fallen's on bigger range, they are totally pointless to pwn
       monsters = monsters.filter((monster) => {
         let isFallenB = fallens.includes(monster.classid);
-        return !isFallenB || monster.isSpecial || getDistance(me, monster) < 5
+        if (!isFallenB) return true;
+        if (monster.isSpecial) return true;
+        const {targetx, targety} = monster;
+        // Only if fallens are close by and not walking away
+        return getDistance(me, monster) < 5 && !targetx || getDistance(me.x, me.y, targetx, targety) < 5;
       })
     }
 
