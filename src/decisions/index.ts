@@ -576,28 +576,24 @@ export default function (): Decision {
       ],
     },
     {
-      description: 'Special leveling up to lvl 20',
-      difficulty: 'normal',
-      children: [
-        {
-          name: 'FarOasis',
-          level: {
-            max: 18,
-          },
-          do() {
-            return gotWp(sdk.areas.FarOasis)
-          },
-          runFirst: 'Shriner',
-        }
-      ]
+      name: 'ToArcane',
+      // if out of things to do, its a good leap ahead
+      description: 'Walk to arcane',
+      depend: sdk.quests.SistersToTheSlaughter,
+      skipAfter: sdk.quests.AbleToGotoActIII,
+      level: {
+        min: 12,
+        max: 18.5,
+      },
+      do() {
+        // When it doesn't have the waypoint, but acess to palace is open
+        return !gotWp(sdk.areas.ArcaneSanctuary) && (me.getQuest(sdk.quests.TheArcaneSanctuary, 3 /* access to palace */))
+      }
     },
     {
       description: 'Act 2',
       depend: sdk.quests.SistersToTheSlaughter,
       skipAfter: sdk.quests.AbleToGotoActIII,
-      level: {
-        min: 18, // Due to teleport
-      },
       children: [
         {
           description: 'normal only',
@@ -611,11 +607,17 @@ export default function (): Decision {
               },
               do() {
                 return haveWp(sdk.areas.CanyonOfMagi) && !me.getItem(sdk.items.IncompleteStaff) && !me.getItem(sdk.items.FinishedStaff);
-              }
+              },
+              level: {
+                min: 18, // Due to teleport
+              },
             },
             {
               name: "Amulet",
               skipAfter: sdk.quests.TheHoradricStaff,
+              level: {
+                min: 18, // Due to teleport
+              },
               do() {
                 return haveWp(sdk.areas.CanyonOfMagi) && !me.getItem(sdk.items.ViperAmulet) && !me.getItem(sdk.items.FinishedStaff)
               }
@@ -625,6 +627,9 @@ export default function (): Decision {
               skipAfter: sdk.quests.TheHoradricStaff,
               gold: {
                 min: Config.LowGold,
+              },
+              level: {
+                min: 18, // Due to teleport
               },
               do() {
                 return haveWp(sdk.areas.CanyonOfMagi)
@@ -689,6 +694,22 @@ export default function (): Decision {
           skipAfter: sdk.quests.TheArcaneSanctuary,
         },
       ],
+    },
+    {
+      description: 'Special leveling up to lvl 20',
+      difficulty: 'normal',
+      children: [
+        {
+          name: 'FarOasis',
+          level: {
+            max: 18,
+          },
+          do() {
+            return gotWp(sdk.areas.FarOasis)
+          },
+          runFirst: 'Shriner',
+        }
+      ]
     },
     {
       description: 'gaining some xp between lvl 18 and 19',
