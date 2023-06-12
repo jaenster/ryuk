@@ -221,3 +221,19 @@ export function getMedianSpot(spots: { [data: string]: { x: number, y: number } 
   center.y = center.y / keys.length;
   return center;
 }
+
+export function getMaxAct() {
+  switch (true) {
+    // @ts-ignore
+    case me.expansion && me.getQuest(sdk.quests.AbleToGotoActV, 0) === 1:
+      return 5;
+    case me.getQuest(sdk.quests.AbleToGotoActIV, 0) === 1:
+      return 4;
+    case me.getQuest(sdk.quests.AbleToGotoActIII, 0) === 1:
+      return 3;
+    case me.getQuest(sdk.quests.AbleToGotoActII, 0) === 1:
+      return 2;
+    default:
+      return 1;
+  }
+}
