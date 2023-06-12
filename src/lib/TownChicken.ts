@@ -1,6 +1,7 @@
 import worker from "../lib/worker";
 import {SkipScript} from "../decisions/Throwables";
 import Shopper from "./town/actions";
+import {pot} from "./town/actions/pot";
 
 const lastChickens: [number, number, number, number][] = [];
 const Config = {
@@ -17,7 +18,8 @@ if (getScript(true).name.toLowerCase() === 'default.dbj') {
     if (Config.disabled) return true;
     if (recursion) return true;
 
-    let potionsPrice = Town.buyPotionsPrice();
+    let potionsPrice = pot.price();
+
     // town chicken if you have enough gold to buy potions, this is the goal of town chickening
     let chicken = !me.inTown && (
       me.hp * 100 / me.hpmax < Config.chicken
@@ -49,7 +51,6 @@ if (getScript(true).name.toLowerCase() === 'default.dbj') {
 
 
     if (chicken) {
-
       let tpTool = Town.getTpTool();
       if (!tpTool) {
         console.log('Cant chicken without portalz');
